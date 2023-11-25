@@ -189,7 +189,7 @@ sections:
       title: Contact
       subtitle:
       text: |-
-        Nel caso volessi contattarmi, non esitare a mandarmi una email.
+        If you want to email me:
       # Contact (add or remove contact options as necessary)
       email: luca.vauda@gmail.com
       # Automatically link email and phone or display as text?
