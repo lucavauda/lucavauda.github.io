@@ -45,43 +45,43 @@ education:
 
 # Skills
 # For available icons, see: https://docs.hugoblox.com/getting-started/page-builder/#icons
-skills:
-  - name: Technical
-    items:
-      - name: Python
-        description: ''
-        percent: 80
-        icon: python
-        icon_pack: fab
-      - name: Data Science
-        description: ''
-        percent: 100
-        icon: chart-line
-        icon_pack: fas
-      - name: SQL
-        description: ''
-        percent: 40
-        icon: database
-        icon_pack: fas
-  - name: Hobbies
-    color: '#eeac02'
-    color_border: '#f0bf23'
-    items:
-      - name: Hiking
-        description: ''
-        percent: 60
-        icon: person-hiking
-        icon_pack: fas
-      - name: Cats
-        description: ''
-        percent: 100
-        icon: cat
-        icon_pack: fas
-      - name: Photography
-        description: ''
-        percent: 80
-        icon: camera-retro
-        icon_pack: fas
+# skills:
+#   - name: Technical
+#     items:
+#       - name: Python
+#         description: ''
+#         percent: 80
+#         icon: python
+#         icon_pack: fab
+#       - name: Data Science
+#         description: ''
+#         percent: 100
+#         icon: chart-line
+#         icon_pack: fas
+#       - name: SQL
+#         description: ''
+#         percent: 40
+#         icon: database
+#         icon_pack: fas
+#   - name: Hobbies
+#     color: '#eeac02'
+#     color_border: '#f0bf23'
+#     items:
+#       - name: Hiking
+#         description: ''
+#         percent: 60
+#         icon: person-hiking
+#         icon_pack: fas
+#       - name: Cats
+#         description: ''
+#        percent: 100
+#         icon: cat
+#         icon_pack: fas
+#       - name: Photography
+#         description: ''
+#         percent: 80
+#         icon: camera-retro
+#         icon_pack: fas
 
 # Social/Academic Networking
 # For available icons, see: https://docs.hugoblox.com/getting-started/page-builder/#icons
@@ -97,15 +97,12 @@ social:
     label: Follow me on Twitter
     display:
       header: true
-  - icon: graduation-cap # Alternatively, use `google-scholar` icon from `ai` icon pack
-    icon_pack: fas
-    link: https://scholar.google.co.uk/
   - icon: github
     icon_pack: fab
     link: https://github.com/lucavauda
   - icon: linkedin
     icon_pack: fab
-    link: https://www.linkedin.com/
+    link: https://www.linkedin.com/in/luca-vaudano-3a751216b/
   # Link to a PDF of your resume/CV.
   # To use: copy your resume to `static/uploads/resume.pdf`, enable `ai` icons in `params.yaml`,
   # and uncomment the lines below.
@@ -116,10 +113,9 @@ social:
 # Highlight the author in author lists? (true/false)
 highlight_name: true
 ---
+Hello! I'm Luca Vaudano, a graduate in Computer Science and Cybersecurity with a passion for cybersecurity. After earning my degree with honors, I began my career as a Cybersecurity Analyst, specializing in Cyber Risk Management.
 
-Ciao! Sono Luca Vaudano, un laureato in Informatica e Sicurezza Informatica con una passione per la cybersecurity. Conseguita la laurea a pieni voti, ho iniziato la mia carriera come Cybersecurity Analyst, inziando nel Cyber Risk Management.
+Currently, my work focuses on risk assessment and management, ensuring the security of networks and sensitive data.
 
-Attualmente, il mio lavoro si concentra sulla valutazione e gestione dei rischi, garantendo la sicurezza delle reti e dei dati sensibili.
-
-La mia passione per l'intelligenza artificiale e il machine learning è evidente nella mia tesi di laurea, dal titolo "Analisi di attacchi nel Federated Learning". In questa tesi ho esplorato la convergenza tra intelligenza artificiale, machine learning e sicurezza informatica, studiando tecniche innovative nell'ambito della difesa della privacy nel contesto di apprendimento distribuito.
+My passion for artificial intelligence and machine learning is evident in my thesis titled "Analysis of Attacks in Federated Learning." In this thesis, I explored the convergence of artificial intelligence, machine learning, and cybersecurity, studying innovative techniques in the realm of privacy defense within the context of distributed learning.
 {style="text-align: justify;"}
