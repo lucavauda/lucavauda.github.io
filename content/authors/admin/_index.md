@@ -1,50 +1,47 @@
 ---
 # Display name
-title: 吳健雄
+title: Luca Vaudano
 
 # Name pronunciation (optional)
-name_pronunciation: Chien Shiung Wu
+name_pronunciation: ''
 
 # Full name (for SEO)
-first_name: Shiung Wu
-last_name: Chien
+first_name: Luca
+last_name: Vaudano
 
 # Status emoji
 status:
-  icon: ☕️
+  icon: 
 
 # Is this the primary user of the site?
 superuser: true
 
 # Role/position/tagline
-role: Professor of Artificial Intelligence
+role: Cybersecurity Consultant
 
 # Organizations/Affiliations to show in About widget
 organizations:
-  - name: Stanford University
-    url: https://www.stanford.edu/
+  - name: Spike Reply
+    url: https://www.reply.com/spike-reply/it/
 
 # Short bio (displayed in user profile at end of posts)
-bio: My research interests include distributed robotics, mobile computing and programmable matter.
+bio: Da aggiungere
 
 # Interests to show in About widget
 interests:
-  - Artificial Intelligence
-  - Computational Linguistics
-  - Information Retrieval
+  - Cybersecurity
+  - Deep Learning
+  - Privacy
 
 # Education to show in About widget
 education:
   courses:
-    - course: PhD in Artificial Intelligence
-      institution: Stanford University
-      year: 2012
-    - course: MEng in Artificial Intelligence
-      institution: Massachusetts Institute of Technology
-      year: 2009
-    - course: BSc in Artificial Intelligence
-      institution: Massachusetts Institute of Technology
-      year: 2008
+    - course: MSc in Cybersecurity
+      institution: University of Milan
+      year: 2023
+    - course: BSc in Computer Sciente
+      institution: University of Turin
+      year: 2021
 
 # Skills
 # For available icons, see: https://docs.hugoblox.com/getting-started/page-builder/#icons
@@ -96,16 +93,16 @@ social:
     link: '/#contact'
   - icon: twitter
     icon_pack: fab
-    link: https://twitter.com/GeorgeCushen
+    link: https://twitter.com/lucavauda
     label: Follow me on Twitter
     display:
       header: true
   - icon: graduation-cap # Alternatively, use `google-scholar` icon from `ai` icon pack
     icon_pack: fas
-    link: https://scholar.google.co.uk/citations?user=sIwtMXoAAAAJ
+    link: https://scholar.google.co.uk/
   - icon: github
     icon_pack: fab
-    link: https://github.com/gcushen
+    link: https://github.com/lucavauda
   - icon: linkedin
     icon_pack: fab
     link: https://www.linkedin.com/
@@ -120,5 +117,9 @@ social:
 highlight_name: true
 ---
 
-Chien Shiung Wu is a professor of artificial intelligence at the Stanford AI Lab. Her research interests include distributed robotics, mobile computing and programmable matter. She leads the Robotic Neurobiology group, which develops self-reconfiguring robots, systems of self-organizing robots, and mobile sensor networks.
+Ciao! Sono Luca Vaudano, un laureato in Informatica e Sicurezza Informatica con una passione per la cybersecurity. Conseguita la laurea a pieni voti, ho iniziato la mia carriera come Cybersecurity Analyst, inziando nel Cyber Risk Management.
+
+Attualmente, il mio lavoro si concentra sulla valutazione e gestione dei rischi, garantendo la sicurezza delle reti e dei dati sensibili.
+
+La mia passione per l'intelligenza artificiale e il machine learning è evidente nella mia tesi di laurea, dal titolo "Analisi di attacchi nel Federated Learning". In questa tesi ho esplorato la convergenza tra intelligenza artificiale, machine learning e sicurezza informatica, studiando tecniche innovative nell'ambito della difesa della privacy nel contesto di apprendimento distribuito.
 {style="text-align: justify;"}
