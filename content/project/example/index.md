@@ -1,6 +1,6 @@
 ---
-title: "Master Thesis: Attacks Analisys on Privacy in Federated Learning"
-summary: My master thesis
+title: "Attacks Analisys on Privacy in Federated Learning"
+summary: My master thesis supervised by Prof. Stelvio Cimato.
 tags:
   - Federated Learning
 date: '2023-11-25T00:00:00Z'
