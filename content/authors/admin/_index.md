@@ -116,10 +116,9 @@ social:
 # Highlight the author in author lists? (true/false)
 highlight_name: true
 ---
+Hello! I'm Luca Vaudano, a graduate in Computer Science and Cybersecurity with a passion for cybersecurity. After earning my degree with honors, I began my career as a Cybersecurity Analyst, specializing in Cyber Risk Management.
 
-Ciao! Sono Luca Vaudano, un laureato in Informatica e Sicurezza Informatica con una passione per la cybersecurity. Conseguita la laurea a pieni voti, ho iniziato la mia carriera come Cybersecurity Analyst, inziando nel Cyber Risk Management.
+Currently, my work focuses on risk assessment and management, ensuring the security of networks and sensitive data.
 
-Attualmente, il mio lavoro si concentra sulla valutazione e gestione dei rischi, garantendo la sicurezza delle reti e dei dati sensibili.
-
-La mia passione per l'intelligenza artificiale e il machine learning è evidente nella mia tesi di laurea, dal titolo "Analisi di attacchi nel Federated Learning". In questa tesi ho esplorato la convergenza tra intelligenza artificiale, machine learning e sicurezza informatica, studiando tecniche innovative nell'ambito della difesa della privacy nel contesto di apprendimento distribuito.
+My passion for artificial intelligence and machine learning is evident in my thesis titled "Analysis of Attacks in Federated Learning." In this thesis, I explored the convergence of artificial intelligence, machine learning, and cybersecurity, studying innovative techniques in the realm of privacy defense within the context of distributed learning.
 {style="text-align: justify;"}
