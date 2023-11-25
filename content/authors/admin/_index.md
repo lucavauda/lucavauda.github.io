@@ -25,7 +25,7 @@ organizations:
     url: https://www.reply.com/spike-reply/it/
 
 # Short bio (displayed in user profile at end of posts)
-bio: Da aggiungere
+bio:
 
 # Interests to show in About widget
 interests:
