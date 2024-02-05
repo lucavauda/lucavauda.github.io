@@ -16,8 +16,8 @@ appearance:
 marketing:
   seo:
     site_type: Person
-    # local_business_type: ''
-    # org_name: ''
+    local_business_type: ''
+    org_name: ''
     description: 'Luca Vaudano's personal blog.'
     twitter: 'lucavauda'
   analytics:
