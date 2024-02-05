@@ -39,7 +39,7 @@ education:
     - course: MSc in Cybersecurity
       institution: University of Milan
       year: 2023
-    - course: BSc in Computer Sciente
+    - course: BSc in Computer Science
       institution: University of Turin
       year: 2021
 
@@ -113,7 +113,7 @@ social:
 # Highlight the author in author lists? (true/false)
 highlight_name: true
 ---
-Hello! I'm Luca Vaudano, a graduate in Computer Science and Cybersecurity with a passion for deep learning. After earning my degree with honors, I began my career as a Cybersecurity Analyst, specializing in Cyber Risk Management.
+Hello! I'm Luca Vaudano, a graduate in Computer Science and Cybersecurity with a passion for deep learning. After earning my degree, I began my career as a Cybersecurity Analyst, specializing in Cyber Risk Management.
 
 Currently, my work focuses on risk assessment and management, ensuring the security of networks and sensitive data.
 
