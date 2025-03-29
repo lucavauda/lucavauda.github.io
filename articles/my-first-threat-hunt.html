@@ -51,6 +51,7 @@
 <li>TargetFilename field containing the string .ps1, case insensitive.</li>
 </ul>
 <p>So here’s how to do it in PowerShell:</p>
+<dt-code language="powershell">
 <pre><code class="lang-powershell"><span class="hljs-comment"># Import your CSV file</span>
 <span class="hljs-variable">$events</span> = <span class="hljs-built_in">Import-Csv</span> -Path <span class="hljs-string">"ch3_sysmon_events.csv"</span>
 
@@ -70,6 +71,7 @@
 <span class="hljs-comment"># Export to a new CSV</span>
 <span class="hljs-variable">$suspiciousWordPs1</span> | <span class="hljs-built_in">Export-Csv</span> -Path <span class="hljs-string">"suspicious_word_ps1.csv"</span> -NoTypeInformation
 </code></pre>
+</dt-code>
 <p>The result of the CSV file (turned into JSON for better viz) is the following:</p>
 <pre><code class="lang-json">[
   {
