@@ -1,0 +1,49 @@
+/* style.css */
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 2em auto;
+    max-width: 800px;
+    padding: 0 1em;
+    color: #333;
+  }
+  
+  h1, h2 {
+    color: #1a1a1a;
+  }
+  
+  ul {
+    list-style: none;
+    padding: 0;
+  }
+  
+  li {
+    margin-bottom: 1em;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1em;
+  }
+  
+  li:last-child {
+      border-bottom: none;
+  }
+  
+  a {
+    text-decoration: none;
+    color: #007bff; /* Or a color you like */
+  }
+  
+  a:hover {
+    text-decoration: underline;
+  }
+  
+  .article-title {
+    font-size: 1.2em;
+    font-weight: bold;
+  }
+  
+  .article-date {
+    font-size: 0.9em;
+    color: #666;
+    display: block; /* Puts date on its own line */
+    margin-top: 0.25em;
+  }

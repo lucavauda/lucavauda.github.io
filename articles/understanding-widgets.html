@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://distill.pub/template.v1.js"></script>
+
+  <script type="text/front-matter">
+    title: "Understanding Widgets: A Deep Dive"
+    description: "Exploring the fundamentals and common patterns of widget design."
+    authors:
+    - Luca Vauda: https://github.com/lucavauda
+    affiliations:
+    - My Affiliation // Or remove if not applicable
+    date: October 26, 2023 // Optional, but good practice
+  </script>
+
+  <title>Understanding Widgets: A Deep Dive</title>
+</head>
+<body>
+  <dt-article>
+    <h1>Understanding Widgets: A Deep Dive</h1>
+    <dt-byline></dt-byline>
+
+    <p>
+      Widgets are fundamental building blocks in many systems. This article explores
+      what they are, why they matter, and some basic concepts behind them.
+      We'll also look at a simple code example.
+    </p>
+
+    <h2>What is a Widget?</h2>
+    <p>
+      A widget can be thought of as a self-contained component with a specific function.
+      Think of buttons, sliders, or even more complex elements like calendars.
+      They often encapsulate both state and behavior. This encapsulation is key
+      to building modular and maintainable applications <dt-cite key="designpatterns94"></dt-cite>.
+    </p>
+
+    <h3>Example: A Simple Counter Widget</h3>
+    <p>Let's consider a basic counter widget implemented in pseudocode:</p>
+    <dt-code block language="pseudocode">
+class CounterWidget {
+  private count = 0;
+
+  function render() {
+    // Display the current count and +/- buttons
+    display("Count: " + this.count);
+    display(button("+", onClick: this.increment));
+    display(button("-", onClick: this.decrement));
+  }
+
+  function increment() {
+    this.count = this.count + 1;
+    this.render(); // Update display
+  }
+
+  function decrement() {
+    this.count = this.count - 1;
+    this.render(); // Update display
+  }
+}
+    </dt-code>
+    <p>
+        This simple example shows state (`count`) and behavior (`increment`, `decrement`, `render`).
+        Real-world widgets are often more complex<dt-fn>Especially when dealing with asynchronous updates or complex styling.</dt-fn>.
+    </p>
+
+  </dt-article>
+
+  <dt-appendix>
+    <h3>References</h3>
+    <!-- Bibliography will appear here -->
+  </dt-appendix>
+
+  <script type="text/bibliography">
+    @book{designpatterns94,
+      title={Design patterns: elements of reusable object-oriented software},
+      author={Gamma, Erich and Helm, Richard and Johnson, Ralph and Vlissides, John},
+      year={1994},
+      publisher={Addison-Wesley}
+    }
+  </script>
+</body>
+</html>

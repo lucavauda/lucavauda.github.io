@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://distill.pub/template.v1.js"></script>
+
+  <script type="text/front-matter">
+    title: "Advanced Gadgets and Their Applications"
+    description: "A look into more complex gadget interactions and use cases."
+    authors:
+    - Luca Vauda: https://github.com/lucavauda
+    date: September 15, 2023
+  </script>
+
+  <title>Advanced Gadgets and Their Applications</title>
+</head>
+<body>
+  <dt-article>
+    <h1>Advanced Gadgets and Their Applications</h1>
+    <dt-byline></dt-byline>
+
+    <p>
+      Moving beyond simple components, advanced gadgets often involve multiple interacting parts,
+      asynchronous operations, or sophisticated user interfaces.
+    </p>
+
+    <h2>Combining Components</h2>
+    <p>
+      Many advanced gadgets are compositions of simpler ones. For instance, a date range picker
+      might combine two calendar widgets with input fields and validation logic. This composition
+      allows for building complex functionality from reusable parts.
+    </p>
+
+    <figure class="l-page"> <!-- Example of using a layout class -->
+        <img src="https://via.placeholder.com/800x200.png?text=Placeholder+Diagram+of+Gadget+Composition" alt="Diagram showing components combined into a gadget">
+        <figcaption>Figure 1: Conceptual view of composing gadgets.</figcaption>
+    </figure>
+
+
+    <h2>Handling Asynchronicity</h2>
+    <p>
+      Gadgets that fetch data from external sources (e.g., a stock ticker gadget) need to handle
+      asynchronous operations gracefully. This often involves managing loading states, error handling,
+      and updating the UI when data arrives. Techniques like Promises or async/await in JavaScript are common.
+      <dt-code language="javascript">
+async function fetchData() { /* ... */ }
+      </dt-code>
+    </p>
+
+  </dt-article>
+
+  <dt-appendix>
+    <h3>Further Reading</h3>
+    <p>Consider exploring libraries like React or Vue for component-based architectures.</p>
+  </dt-appendix>
+
+  <script type="text/bibliography">
+  </script> <!-- Empty bibliography if no citations needed -->
+</body>
+</html>

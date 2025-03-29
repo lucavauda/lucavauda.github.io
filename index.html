@@ -1,75 +1,49 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-  <!-- Link to the Distill template script -->
-  <script src="https://distill.pub/template.v1.js"></script>
-
-  <!-- Front Matter (Metadata about your article) -->
-  <script type="text/front-matter">
-    title: "My First Distill-Styled Blog Post"
-    description: "An example of using the Distill template on GitHub Pages."
-    authors:
-    - Your Name: https://github.com/your-username  // Link to your profile or website
-    affiliations:
-    - Independent Researcher // Or your actual affiliation
-  </script>
-
-  <!-- Optional: Link to a custom CSS file *after* the Distill script if you want overrides -->
-  <!-- <link rel="stylesheet" href="custom-styles.css"> -->
-
-  <title>My First Distill-Styled Blog Post</title> <!-- Regular HTML title -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luca Vauda - Blog</title>
+    <link rel="stylesheet" href="style.css"> <!-- Link to the CSS file -->
 </head>
 <body>
 
-  <!-- Distill Article Container -->
-  <dt-article>
-    <h1>My First Distill-Styled Blog Post</h1>
-    <dt-byline></dt-byline> <!-- This tag automatically pulls from front-matter -->
+    <h1>Luca Vaudano's Blog</h1>
+    <p>A collection of articles and thoughts, often exploring data visualization and technical topics.</p>
 
-    <p>
-      Welcome to my blog! This post demonstrates how to use the Distill
-      template hosted on GitHub Pages.
-    </p>
-    <p>
-      You can use standard HTML tags like paragraphs, headings (h2, h3...), lists, etc.
-      You can also use Distill's custom tags like citations
-      <dt-cite key="example2023"></dt-cite> and footnotes<dt-fn>This is a footnote.</dt-fn>.
-    </p>
+    <h2>Articles</h2>
+    <ul>
+        <li>
+            <!-- Link to the first article -->
+            <a href="/articles/understanding-widgets.html" class="article-title">
+                Understanding Widgets: A Deep Dive
+            </a>
+            <span class="article-date">October 26, 2023</span>
+            <!-- Optional short description -->
+            <p>Exploring the fundamentals and common patterns of widget design.</p>
+        </li>
+        <li>
+            <!-- Link to the second article -->
+            <a href="/articles/advanced-gadgets.html" class="article-title">
+                Advanced Gadgets and Their Applications
+            </a>
+            <span class="article-date">September 15, 2023</span>
+            <p>A look into more complex gadget interactions and use cases.</p>
+        </li>
+        <li>
+             <!-- Link to the third article -->
+            <a href="/articles/visualising-data.html" class="article-title">
+                Effective Data Visualisation with Simple Tools
+            </a>
+            <span class="article-date">August 01, 2023</span>
+            <p>How to create compelling data visualizations without complex libraries, using Distill components.</p>
+        </li>
+        <!-- Add more list items here as you write new articles -->
+    </ul>
 
-    <h2>Adding Content</h2>
-    <p>Just write your content within the <code><dt-article></code> tags.</p>
-
-    <h3>Code Example</h3>
-    <dt-code block language="javascript">
-function greet(name) {
-  console.log(`Hello, ${name}!`);
-}
-greet('World');
-    </dt-code>
-
-  </dt-article>
-
-  <!-- Optional: Appendix Section -->
-  <dt-appendix>
-    <h3>Acknowledgments</h3>
-    <p>Thanks to the Distill team for the template.</p>
-
-    <h3>Bibliography</h3>
-    <!-- Bibliography will be auto-populated here if citations are used -->
-  </dt-appendix>
-
-  <!-- Bibliography Data -->
-  <script type="text/bibliography">
-    @misc{example2023,
-      title={An Example Citation},
-      author={Author, A. N.},
-      year={2023},
-      url={https://example.com}
-    }
-  </script>
+    <footer>
+        <p><a href="https://github.com/lucavauda">GitHub</a> | Built with GitHub Pages</p>
+    </footer>
 
 </body>
 </html>
