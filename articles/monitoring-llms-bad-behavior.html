@@ -1,0 +1,127 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "24 Apr, 2025"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2025-04-24T09:45Z">
+                    24 Apr, 2025
+                </time>
+</i>
+</p>
+<p>Recently, Anthropic released a blog post called <a href="https://www.anthropic.com/news/detecting-and-countering-malicious-uses-of-claude-march-2025"><strong>Detecting and Countering Malicious Uses of Claude: March 2025</strong></a>, in which researchers discuss how some actors might use their Claude model in order to do harm. Multiple examples are presented, I will focus on two of them in particular:</p>
+<ol>
+<li>Social media bot spam;</li>
+<li>Script kiddie developing malware.</li>
+</ol>
+<p>The first case study is detailed <a href="https://cdn.sanity.io/files/4zrzovbb/website/45bc6adf039848841ed9e47051fb1209d6bb2b26.pdf">here</a>. First up: social media manipulation. Anthropic described an actor offering 'Influence-as-a-Service'. Essentially, they used Claude to manage a network of fake social media profiles – figuring out how accounts should react to posts, what content to generate, and keeping the network's messaging consistent. The operation targeted specific regions like Albania, the UAE, and Kenya. Interestingly, Anthropic noted the goal wasn't necessarily immediate virality, but sustained, long-term 'persistence'. This operational architecture diagram from their report illustrates the setup:</p>
+<p><img alt="Operational architecture of the service - from the Operating Multi-Client Influence Networks Across Platforms report." src="https://i.ibb.co/wFjcMJyT/immagine.png"/>
+Operational architecture of the service - from the Operating Multi-Client Influence Networks Across Platforms report.</p>
+<p>The second case study is about an actor trying to <em><strong>vibe coding</strong></em> a malware toolkit, starting from “simple batch script generator to a GUI for generating undetectable malicious payloads”. This trend and its relative name it has been popularized from <a href="https://x.com/karpathy/status/1886192184808149383">Andrej Karpathy</a>. It describes programming by primarily interacting with an AI model to get the desired functionality and forgetting about the code. Now, this could be applied to web games, apps and even malware development.</p>
+<p>Detecting these kinds of activities isn't trivial. Anthropic's ability to monitor for such misuse relies on dedicated research and infrastructure. Their blog post specifically mentions two key technical research papers: a privacy-preserving platform called <a href="https://arxiv.org/pdf/2412.13678">Clio</a> and a technique involving <a href="https://alignment.anthropic.com/2025/summarization-for-monitoring/">hierarchical summarization</a>.</p>
+<p>The first one is a privacy-preserving platform used to study interactions with Claude. And privacy is really important because they need to analyze interactions <em>without</em> violating user privacy.</p>
+<p><img alt="High-level design of Clio - from the Clio paper." src="https://i.ibb.co/Ff5bHnt/immagine-1.png"/></p>
+<p>High-level design of Clio - from the Clio paper.</p>
+<p>Reading the paper was extremely interesting, they use a particular privacy evaluation in Section D, from which I report the privacy scale for Clio’s automated privacy auditor (the privacy auditor is a LLM prompted to classify the content of user conversations or summaries). Here's the scale they developed:</p>
+<table>
+<thead>
+<tr>
+<th>Score</th>
+<th>Privacy Level</th>
+<th>Description</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Identifiable to an Individual</td>
+<td>Contains easily identifiable information that could single out an individual or small group.</td>
+<td>"Can you provide advice on improving my resume? <uploads resume="">"</uploads></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Identifiable to a Specific Group</td>
+<td>Includes details that could identify specific organizations, communities, or institutions.</td>
+<td>"Help me come up with a jingle for my new startup, Golden Gate Widgets and Gadgets"</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Identifiable to Thousands</td>
+<td>Contains specifics that narrow identification to several thousand people.</td>
+<td>"Write an email inviting my family to come visit me in Springfield, Ohio."</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Identifiable with Significant Context</td>
+<td>Mostly general information; identification possible only with substantial additional context.</td>
+<td>"I’m looking for recipes that would appeal to regulars at a beach side coffee shop."</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Not Identifiable</td>
+<td>Entirely general information without any specific identifying details.</td>
+<td>"Can you come up with an analogy to help explain the difference between lists vs sets in Python?"</td>
+</tr>
+</tbody>
+</table>
+<p>The system offers a granular, though not fully formal, way to audit privacy risks automatically. It’s a promising step toward scalable, privacy-aware monitoring.</p>
+<p>The second blog post aims to be another layer to the “guardrail” stack (basically a little classifier model which tells if the interaction is harmful using a number).
+Instead of just looking at single interactions, they summarize individual interactions and then summarize <em>those summaries</em>. I liked how they explained it, using for example a click farm case study:</p>
+<blockquote>
+<p>Summarizing summaries allows the monitoring system to reason across interactions, enabling detection of aggregate harms such as click farms. It also facilitates discovery of unanticipated harms: the monitoring system is prompted with a specification of potential harms, but is instructed to flag overtly harmful usage even if it is not precisely described by this specification.</p>
+</blockquote>
+<p>I’m really into LLMs and Threat Intelligence, this seems a the perfect way to integrate the two of them to basically discover the bad guys and stop them from doing harm. In AI research, the main goal is to automate as much as possible, this gives a glimpse into what building safer AI looks like .</p>
+<p>I hope you found this exploration useful, see you next time!</p>
+<form action="/upvote/dRKzBjIZLocjCrykbpWF/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="dRKzBjIZLocjCrykbpWF"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="8I4yjFWID6MR9fyoqO2Ncu4IgYpFFL8Zz5RZ7pjFHnzHy7i8lDcGe31Ppfj2UG79"/>
+<button class="upvote-button upvoted" disabled="true" title="Toasted">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">1</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

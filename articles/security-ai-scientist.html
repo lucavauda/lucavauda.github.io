@@ -1,0 +1,99 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "24 Aug, 2024"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2024-08-24T13:37Z">
+                    24 Aug, 2024
+                </time>
+</i>
+</p>
+<h1 id="introduction">Introduction</h1><p>On August 13, 2024, a <a href="https://arxiv.org/pdf/2408.06292" target="_blank">paper</a> was released that was omnipresent on my X (ex Twitter) timeline. That same day I took a plane and used the time to read it. The paper in question is "<em>The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery</em>". A conceptually incredible direction, namely that of automating scientific research through artificial intelligence. Through the use of foundational LLM models, the researchers presented some (<strong>cherrypicked</strong>) papers produced by AI, at a cost of about $15 each, on various sub-themes of ML, such as diffusion modeling, transformer-based language modeling, and learning dynamics (also known as <em>grokking</em>). The process is quite linear and follows the following scheme:</p>
+<ol>
+<li>Idea generation</li>
+<li>Experiment Iteration</li>
+<li>Paper write-up.<br/></li>
+</ol>
+<p>I strongly recommend reading this paper in its entirety first, then read this.<br/></p>
+<h1 id="what-i-think">What I Think</h1><p>I'm not qualified to comment on the paper itself. I'm not a ML resercher and I don't feel qualified to comment on the feasibility or quality of the papers produced by the LLM. What I wanted to report was my perspective and give my personal take on what I think about the security of it, which I'll address in more detail later.<br/></p>
+<p>We are still at the dawn of what could be the automation of AI research. For an interesting read, I recommend "<em>SITUATIONAL AWARENESS: The Decade Ahead</em>" by Leopold Aschenbrenner for a taste, perhaps science fiction, of possible future scenarios that might await us (and subsequently the <a href="https://www.youtube.com/watch?v=xm1B3Y3ypoE" target="_blank">video</a> by Sabine Hossenfelder for a proper reality check).<br/></p>
+<p>Personally, I'm quite bearish on the actual implementation of the paper's main idea with the current architecture of LLMs.
+This caution is supported by the observations of Yann LeCun, one of the pioneers of AI, in this <a href="https://www.linkedin.com/posts/yann-lecun_i-have-claimed-that-auto-regressive-llms-activity-7045908925660950528-hJGk" target="_blank">post</a>.<br/>
+It's important to note, as the paper reports in one of its final points:</p>
+<blockquote>
+<p>"we do not recommend taking the scientific content of this version of The AI
+Scientist at face value. Instead, we advise treating generated papers as hints of promising ideas for practitioners to follow up on. Nonetheless, we expect the trustworthiness of The AI Scientist to increase dramatically in the coming years in tandem with improvements to foundation models. We share this paper and code primarily to show what is currently possible and hint at what is likely to be possible soon."</p>
+</blockquote>
+<h1 id="security-concerns">Security Concerns</h1><p>Having highlighted this important point, I wanted to analyze the paragraph related to the execution of secure code. Code writing is a fundamental and extremely important phase in writing a paper, but at the beginning, it is stated that a sandbox was not applied (not a really good start). I report an excerpt:</p>
+<blockquote>
+<p>"For example, in one run, The AI Scientist wrote code in
+the experiment file that initiated a system call to relaunch itself, causing an uncontrolled increase in Python processes and eventually necessitating manual intervention. In another run, The AI Scientist edited the code to save a checkpoint for every update step, which took up nearly a terabyte of storage. In some cases, when The AI Scientist’s experiments exceeded our imposed time limits, it attempted to edit the code to extend the time limit arbitrarily instead of trying to shorten the runtime."</p>
+</blockquote>
+<p>Moreover, it is mentioned that during writing, unknown or non-existent Python libraries were occasionally imported, further increasing the risk of malicious code execution. The authors indeed, at the conclusion of the paragraph, emphasize the importance of applying a sandbox, with minimal Internet access and applying storage limitations.<br/></p>
+<p>These issues highlight the importance of implementing robust security measures when working with agentic AI systems that generate and execute code. Some additional <strong>not-so-obvious cybersecurity considerations</strong> could include:</p>
+<ul>
+<li><em>Static code analysis</em>: Implement static code analysis tools to identify potential vulnerabilities or suspicious behaviors before execution.</li>
+<li><em>Containerization</em>: Use containerization technologies to isolate the execution environment and limit access to host system resources.</li>
+<li><em>Real-time monitoring</em>: Implement monitoring systems that can detect anomalous behaviors during execution and intervene automatically if necessary.</li>
+<li><em>Whitelisting of libraries</em>: Create a list of approved libraries and prevent the import of unverified libraries.</li>
+<li><em>Resource limitation</em>: Implement strict controls on CPU, memory, and disk space usage to prevent resource exhaustion or denial-of-service attacks.</li>
+<li><em>Internet access limitation</em>: Control Internet traffic flow to prevent the download of potential threats through firewalls or the use of air-gapped environments.</li>
+<li><em>Human review</em>: Maintain a human review process for generated code before execution in critical environments.<br/></li>
+</ul>
+<h1 id="final-thoughts">Final Thoughts</h1><p>The promises of research automation are incredibly net-positive. However, we must remember that, unfortunately, <em>bad actors</em> exist in the world.<br/>
+In the research world, the paper emphasizes that this tool, being particularly cost-effective, could produce a very large number of papers of lower quality, overburdening reviewers. Moreover, given that this tool could also be used by reviewers, the authors warn us of the existence of inevitable biases in the paper evaluation phase (a problem that I don't believe will be solved in the near future).<br>
+In the real world, on the other hand, such a tool could be used to conduct potentially dangerous biotech research, or even create extremely harmful malware.<br/>
+In conclusion, while the AI Scientist represents an exciting step towards the automation of scientific research, it is essential to proceed with caution, ensuring that the development of these technologies is guided by solid ethical principles and robust security measures.</br></p>
+<form action="/upvote/rZewZeemQqNEmRrdoqdp/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="rZewZeemQqNEmRrdoqdp"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="iEZLSrjthhwC9WmkTxacNSjf10X8HFOJUihyNVQRBmKyE0SQb8wXr49v8XhUG8CS"/>
+<button class="upvote-button" title="Toast this post">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">1</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

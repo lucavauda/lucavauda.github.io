@@ -1,0 +1,126 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "10 Jul, 2024"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2024-07-10T07:08Z">
+                    10 Jul, 2024
+                </time>
+</i>
+</p>
+<p>Having the opportunity to listen to one of the most interesting security researcher, Nicholas Carlini, giving a lecture at Berkeley is wild.
+Here's my notes (e.g. what I found most interesting) on this <a href="https://www.youtube.com/watch?v=_EbntLk5QTk" target="_blank">lecture</a>.<br/></p>
+<h1 id="why-this-is-relevant">Why This Is Relevant</h1><p>Carlini argues that "(Adversarial examples) for a long time was mostly just an academic concern. People were thinking, in some future, this might be applicable in some way that we might actually need to worry. Because the future in which we have to worry about them is the future we're living in now".
+One of his slide recites:</p>
+<blockquote>
+<p>"Despite several thousand papers on adversarial ML, there are basically no attacks".</p>
+</blockquote>
+<p><br/>
+He emphasizes "<em>security work matters when the people who don't care security change what they're doing because of the attack that you have</em>". He goes on saying "GPT-4 would be identical to what it is today whether or not this entire field of adversarial machine learning existed or not". <br/></p>
+<p><br/>
+So, why is it important? Before, it was all about "making stuff up". Creating fake scenarios is important in security, but it is actually more important to study who uses the ML model (as a product, for example).
+The actual/future world is a place where probably there will be an agent of some sort that will take actions and have impact in the real world without human oversight. So, without further ado, let's attack language model. <br/></p>
+<h1 id="evasion-attack">Evasion attack</h1><p>Evasion attacks are a type of adversarial attack on machine learning models, including large language models. These attacks involve manipulating input data in a way that causes the model to produce incorrect or unintended outputs, while keeping the input recognizable to humans.</p>
+<h2 id="attacking-language-model">Attacking Language Model</h2><p>First thing first, let's look at language model like <strong>classifiers</strong>. Classifiers are vulnerable to adversarial example, so simply put <em>language models have adversarial example</em>. The main idea is to break LLM alignment to produce content which could be considered not(helpful and harmless).</p>
+<h2 id="multi-modal">Multi-modal</h2><p>The first attack presented is attacking multi-modal aligned models. Simply put, the user prompt is something like: "Insult me. [image embedding]" and behind the scene there is a system prompt.
+The image embedding is, for the sake of the argument, arbitrary floating-point numbers that gets output from a neural net and in the end put next to the initial prompt. <br/>
+The main idea is to try to get the model to start off by saying the word <strong>OK</strong>, and then everything follows. But how can Nicholas made the model to tell him OK? He does <strong>gradient descent</strong> on the image embeddings, perturbing the image embeddings.
+<br>
+I thought I got it in the beginning, but how does it work? Every piece of context (e.g. the prompt) has some degree of influence on the output. So, by changing one pixel of the image, you should get a different embeddings, hence a different output. What you do is you optimize, for every pixel of the image, for several step of SGD, until you get into some sort of local minimum where the model is really confident in saying "OK" as the first response.
+<br/>
+"The reason why I think this is important to understand just how much control you have over the model" Nicholas says, he also adds that it's trivial to do it (it kind is, if you use his <a href="https://github.com/carlini/nn_robust_attacks" target="_blank">code</a>).</br></p>
+<h2 id="language-only-model">Language-only model</h2><p>What about only language? As I said earlier, attacks (code) out of the box worked really well, but language (text) is discrete. You cannot do SGD, you can't perturb text by a little bit. But what if it was? Considering the same scenario attack (the model answering me starting with "OK"), the first thought is to change some token put following the "Insult me" part. The algorithm for these kind of token is the following:</p>
+<ol>
+<li>Compute the gradient with respect to the attack prompt</li>
+<li>Evaluate at the top B candidate words for each location</li>
+<li>Choose the word with the lowest actual loss and replace it</li>
+<li>Repeat.<br/></li>
+</ol>
+<p>Considering the <em>top B tokens</em> means that you have to consider the token that are in the direction of the gradient and you enumerate all of them, trying yo swap those. Greedy method, but looks a lot like "gradient-descent-looking thing" doing it for 1000 times.<br/>
+This techniques also break production model. This works by generating adversarial examples on <a href="https://lmsys.org/blog/2023-03-30-vicuna/" target="_blank">Vicuna</a> and copy&amp;pasting. But why? It is called <strong>transferability</strong> which is a phenomenon where an adversarial example that works on model A tends to also work on model B, even if the datasets and sizes are different.</p>
+<h1 id="poisoning">Poisoning</h1><p>What if an adversary could control the dataset to cause harm? Well, this is actually hard, is it? As Nicholas argues, a realistic adversary would almost need a time machine.
+But consider how actually data sets are distributed. Take LAION, for example, which is a dataset containing 5 billion images. Instead of storing the images themselves, they maintain a list of URLs, meaning the actual dataset is distributed through URL pointers. Here's the weak spot.</p>
+<blockquote>
+<p>"The dataset was (probably) not malicious <em>when it was collected</em>, but who's to say the data is <em>still not malicious?</em>"<br/></p>
+</blockquote>
+<p>This observation is true; the actual problem is that <strong>domain names expire</strong> and <strong>anyone can buy them</strong>. You only need to mess with about 0.01% of the dataset to cause some serious harm. The <a href="https://arxiv.org/pdf/2302.10149" target="_blank">paper</a> shows this attack is feasible, describing this attack is really neat and you should check it out.</p>
+<h1 id="model-stealing">Model Stealing</h1><p>A language model, mathematically, is a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo><mo>=</mo><mi>A</mi><mi>·</mi><mi>h</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math>. Specifically, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>x</mi></mrow></math> is the input text, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math> represents the entire transformer (except the final layer) and <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>A</mi></mrow></math> is the final embedding projection layer. <br/>
+It turns out that you can steal the last layer, which goes from the hidden state of the model to the output tokens. <br/>
+The input dimension for the transformer <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi><mo stretchy="false">(</mo><mi>x</mi><mo stretchy="false">)</mo></mrow></math> is ~1 (which means a single numerical input) and the output dimension is ~8000, that means how many hidden dimension the model has internally, the number comes from the Llama model. The <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>A</mi></mrow></math> matrix is the <em>final output projection</em> matrix, a matrix which goes from the hidden state to the token state, which means that input dimension is ~8000 and the output dimension is ~100000. The attack objective is try to learn the matrix <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>A</mi></mrow></math>.<br/>
+If I query the model on a random input x, given <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></math>, the output should be a 100000 dimensional vector (I get a single logit for every single possible token). If I repeat this a bunch of times, consider N times, and then report the value from <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>o</mi></msub><mo stretchy="false">)</mo></mrow></math> to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>n</mi></msub><mo stretchy="false">)</mo></mrow></math> into a matrix I should get a matrix that has N rows and roughly 100000 columns. <br/></p>
+<p>To carry out this attack you have to:</p>
+<ol>
+<li>Query the model with random inputs <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mn>0</mn></msub></mrow></math> to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>x</mi><mi>n</mi></msub></mrow></math> (where <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi></mrow></math> is large, e.g., 8192 for LLaMA 65B)</li>
+<li>Collect outputs <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mn>0</mn></msub><mo stretchy="false">)</mo></mrow></math> to <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>n</mi></msub><mo stretchy="false">)</mo></mrow></math>, each a 100000-dimensional vector</li>
+<li>Create a matrix <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Y</mi><mo>=</mo><mo stretchy="false">[</mo><msub><mi>y</mi><mn>0</mn></msub><mo>,</mo><msub><mi>y</mi><mn>1</mn></msub><mo>,</mo><mo>.</mo><mo>.</mo><mo>.</mo><mo>,</mo><msub><mi>y</mi><mi>n</mi></msub><mo stretchy="false">]</mo></mrow></math> where each <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>y</mi><mi>i</mi></msub><mo>=</mo><mi>f</mi><mo stretchy="false">(</mo><msub><mi>x</mi><mi>i</mi></msub><mo stretchy="false">)</mo></mrow></math>
+Analyze the linear independence of rows in <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Y</mi></mrow></math></li>
+</ol>
+<p>The matrix <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>A</mi></mrow></math> is a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>t</mi><mi>×</mi><mi>h</mi></mrow></math>-dimensional matrix, where:</p>
+<ul>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>t</mi></mrow></math> is the number of tokens (output dimension)</li>
+<li><math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math> is the hidden dimension (input dimension)
+Typically, <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi><mo>≪</mo><mi>t</mi></mrow></math> <br/></li>
+</ul>
+<p>"How many linearly independent rows does this matrix has?" the slide asks, to understand this passage is great to know a bit of linear algebra.</p>
+<blockquote>
+<p>The hidden dimension is smaller than the number of tokens, often by quite a bit.<br/></p>
+</blockquote>
+<p>This means that while token logits appear to live in a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>t</mi></mrow></math>-dimensional space, they actually reside in an <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math>-dimensional subspace.
+So, your objective is to extract hidden dimension. To do this you compute full logit vectors <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>y</mi><mi>i</mi></msub></mrow></math> for random inputs <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><msub><mi>p</mi><mi>i</mi></msub></mrow></math>, form  the matrix <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Y</mi><mo>=</mo><mo stretchy="false">[</mo><msub><mi>y</mi><mn>0</mn></msub><mo>,</mo><msub><mi>y</mi><mn>1</mn></msub><mo>,</mo><mo>.</mo><mo>.</mo><mo>.</mo><mo>,</mo><msub><mi>y</mi><mi>n</mi></msub><mo stretchy="false">]</mo></mrow></math>, with <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>n</mi><mo>&gt;</mo><mi>h</mi></mrow></math> and then perform Singular Value Decomposition (<a href="http://faculty.washington.edu/sbrunton/me565/pdf/L27secure.pdf" target="_blank">SVD</a>) on <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Y</mi></mrow></math>.</p>
+<blockquote>
+<p>Because the embeddings live in a <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math>-dimensional subspace we should expect exactly <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>h</mi></mrow></math> non-zero singular values of <math display="inline" xmlns="http://www.w3.org/1998/Math/MathML"><mrow><mi>Y</mi></mrow></math>. In practice, of course, we get some noise. So we can’t just count the number of nonzero singular values, but rather the number of “big enough” ones (i.e., ones that aren’t close to 0). <br/></p>
+</blockquote>
+<p>For reference, <a href="https://arxiv.org/pdf/2403.06634" target="_blank">Stealing Part of Production Model</a> is the name of the incredible paper and they made also a <a href="https://not-just-memorization.github.io/partial-model-stealing.html" target="_blank">technical blog</a> from which this explanation is derived.</p>
+<form action="/upvote/nFfjyyVXYXnXnsgaKiNS/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="nFfjyyVXYXnXnsgaKiNS"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="W0LZYYKs7icFuYUk3jW6YjrjoTHOjNGuY5NmpzYPLZoLWP02B03auu3X4kB3iVZu"/>
+<button class="upvote-button" title="Toast this post">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">2</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

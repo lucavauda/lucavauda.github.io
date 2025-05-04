@@ -1,0 +1,277 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "14 Sep, 2024"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2024-09-14T08:16Z">
+                    14 Sep, 2024
+                </time>
+</i>
+</p>
+<p>So recently I read this <a href="https://x.com/kylevedder/status/1821318595068227714?s=52" target="_blank">tweet</a> and my honest response was: "Of course I can't". But I'm willing to try and learn. So here's a blogpost about learning how to implement the backpropagation algorithm with NumPy. To be fair, I'm not a ML person, I'm just studying and this is a nice exercise.<br/></p>
+<p>Given the title, I want to learn how to implement the backpropagation algorithm in NumPy (the original tweet also cites "with no internet" but I'll need it.). First of all, to brush up my knowledge of the backpropagation algorithm I watched <a href="https://youtu.be/SmZmBKc7Lrs?si=CqMholzmfqN8dHc-" target="_blank">this</a> video from Artem Kirsanov and <a href="https://youtu.be/Ilg3gGewQ5U?si=MP0upuAB0HXS8XpV" target="_blank">this</a> one from 3Blue1Brown.
+Then, to get a better grip on the coding part, I watched Karpathy Autograd video lecture.<br/></p>
+<p>I think it's time to code, because if I can't code it, I didn't get it.<br/></p>
+<p>Let's start with the basics. My goal here is to be extremely clear and try to explain (to myself) the backprop algo. First things first, let's import numpy, python library for linear algebra.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+</pre></div>
+<p>Let's define an activation function which we will need later. Activation function are the non linear part of a NN. I choose sigmoid arbitrarily (I could have chosen a ReLu, it's the same for learning purpose).</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">sigomoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+</pre></div>
+<p>Next, I want a simple function that calculates the derivative of the sigmoid (had to double-check my math but I think it's right):</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">derivative_sigomoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+</pre></div>
+<p>Then, I'll make a class called SimpleNeuralNetwork, it will encapsulate all the functions needed to have a functioning NN. I wanted to make a neural network which is 4 input neuron, 1 output neuron and 4 neuron as a hidden layers.
+I will show an example of this network learn a XOR function (remember that NN are a function approximators, you can basically teach them any functions you can think of).<br/></p>
+<p>For the first function in our class let's define the constructor.
+Here it is:</p>
+<div class="highlight"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">):</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+</pre></div>
+<p>The <strong>init</strong> method sets up the network architecture with specified input, hidden, and output layer sizes. I set up the random seed for reproducibility so you can have the same results as me (I hope). Then the weights are initialized randomly. The connections between the input layer and hidden layer are represented by the weight matrix self.w1 and the connections between the hidden layer and output layer are represented by the weight matrix self.w2.<br/></p>
+<p>Now, we move on to the first important step, which is called the <strong>forward pass</strong>:</p>
+<div class="highlight"><pre><span></span> <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span>
+</pre></div>
+<p>The first multiplication in done between X (input neurons) which contains a simple matrix we will define later and w1, the aforemnetioned matrix. The weighted sum is computed and then the activation function is applied. Then the same thing is done for the a1 matrix getting the result and multiplying it for w2. At the end sigmoid is applied.<br/></p>
+<p>We arguably got to the toughest point. The <strong>backpropagation function</strong>. Here's the core of our problem and why I decided to write this.<br/>
+The backpropagation is how a network learns. The example in this blog is how this network can approximate a XOR function. Here's the code of the backward function. I'll try to explain each operation.</p>
+<div class="highlight"><pre><span></span>    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_error</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_error</span> <span class="o">*</span> <span class="n">sigmoid_derivative</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w2</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1_error</span> <span class="o">*</span> <span class="n">sigmoid_derivative</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">w1</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1_delta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w2</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span><span class="p">)</span>
+</pre></div>
+<p>The main idea is to use the error of the output layer and calculate the error w.r.t. the weights and then update them.
+So the first operation is calculate the <strong>output error</strong> so a simple subtraction to show how far the prediction (output) is from the true value (y).
+The second is the crucial operation of backpropagation, at first we defined the sigmoid_derivative function, which was a simple function to calculate the slope of the sigmoid function at the output value. We want to combine two kind of information which are: how much we missed by the output error and how much the output activation function (sigmoid) was changing at the point of the output.<br/>
+The intuition behind this:</p>
+<ul>
+<li>If the sigmoid function was very flat at our output point (derivative close to 0), even a large error won't cause much change, because the output wasn't very sensitive to input changes at that point.</li>
+<li>If the sigmoid function was very steep (derivative close to 1), we'll make larger adjustments because the output was sensitive to input changes.</li>
+</ul>
+<p>This output_delta is then used to calculate how much to adjust the weights between the hidden layer and the output layer, and also to calculate the error for the hidden layer (which is then used to adjust the weights between the input and hidden layers).
+The key idea is that we're not just using the raw error, but we're considering how much the activation function can change at that point, which helps us make more appropriate adjustments to our weights.</p>
+<p>Let's break down the remaining parts: calculate the error for the hidden layer (z1_error). This step propagates the error from the output layer back to the hidden layer. We multiply the output_delta by the transpose of w2 (the weights between hidden and output layers). Just to be clear, the transpose of a matrix is an operator which flips a matrix over its diagonal; we use that because it allows us to reverse the direction of the computation, effectively propagating the error backwards through the network. For a simple example consider a simple matrix w2 as:</p>
+<table>
+<thead>
+<tr>
+<th>w2 (4x1)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>w1</td>
+</tr>
+<tr>
+<td>w2</td>
+</tr>
+<tr>
+<td>w3</td>
+</tr>
+<tr>
+<td>w4</td>
+</tr>
+</tbody>
+</table>
+<p>The transposition of this particular matrix is:</p>
+<table>
+<tr>
+<th colspan="4" style="text-align:center">w2.T (1x4)</th>
+</tr>
+<tr>
+<td>w1</td>
+<td>w2</td>
+<td>w3</td>
+<td>w4</td>
+</tr>
+</table>
+<p>This reversal is crucial for backpropagation, as it enables us to distribute the error signal back through the network.
+The transposed weights maintain the same connections but in the opposite direction, preserving the relative importance of each connection.</p>
+<p>This gives us an estimate of how much each hidden neuron contributed to the output error.<br/></p>
+<p>Then we calculate the delta for the hidden layer (z1_delta).<br/>
+Similar to the output delta, this combines the error at the hidden layer with the derivative of the activation function.
+self.a1 represents the activations of the hidden layer.
+This tells us how to adjust the hidden layer's activations to reduce the error.<br/></p>
+<p>Last two operations are: first we update the weights between input and hidden layers (w1):</p>
+<div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">w1</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1_delta</span><span class="p">)</span>
+</pre></div>
+<p>X.T is the transpose of the input, same intuition as before. We multiply this by z1_delta to get the gradient for w1.
+This updates w1 to reduce the error. (Note: in a full implementation, you'd typically multiply this by a learning rate.)
+The learning rate is</p>
+<blockquote>
+<p>a tunable parameter that determines the step size at each iteration while moving toward a minimum of a loss function.</p>
+</blockquote>
+<p>The intuition is that we're adjusting each weight in proportion to both the input value it's connected to (X.T) and the error it caused (z1_delta). Larger inputs or larger errors will cause larger weight updates.</p>
+<p>Updating the weights between hidden and output layers (w2):</p>
+<div class="highlight"><pre><span></span><span class="bp">self</span><span class="o">.</span><span class="n">w2</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span><span class="p">)</span>
+</pre></div>
+<p>self.a1.T is the transpose of the hidden layer activations.
+We multiply this by output_delta to get the gradient for w2.
+This updates w2 to reduce the error. (Again, typically you'd include a learning rate.)
+Similar to the w1 update, we're adjusting each weight based on the activation of the hidden neuron it's coming from (a1.T) and the error it caused in the output (output_delta).<br/>
+This process of updating weights based on the calculated error is what allows the neural network to learn from its mistakes and gradually improve its predictions over many iterations of training.
+And that's what backpropagation is about. <br/></p>
+<p>Then if we want to test our NN, we have to define a simple main function.</p>
+<div class="highlight"><pre><span></span><span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="c1"># Input data</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="c1"># Create and train the network</span>
+    <span class="n">nn</span> <span class="o">=</span> <span class="n">SimpleNeuralNetwork</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c1"># Test the network</span>
+    <span class="n">test_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prediction for [1, 1, 0]: </span><span class="si">{</span><span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="c1"># Print final weights</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final weights:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Input to hidden layer (W1):"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">w1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Hidden to output layer (W2):"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">w2</span><span class="p">)</span>
+</pre></div>
+<p>First, we prepare the data, in this example we create the input data (X) and corresponding target outputs (y). X is a 4x3 matrix, representing 4 training examples, each with 3 input features. y is a 4x1 matrix, representing the desired output for each training example.
+This data represents the XOR problem: the output is 1 if exactly one of the first two inputs is 1, otherwise it's 0. <br/>
+Then we create an instance of our neural network by using the SimpleNeuralNetwork constructor.The arguments (3, 4, 1) specify:</p>
+<ul>
+<li>3 input neurons (matching the 3 features in our input data)</li>
+<li>4 hidden neurons</li>
+<li>1 output neuron</li>
+</ul>
+<p>Afterwards, we train the network on our data using the method train. It will run for 10,000 epochs (complete passes through the training data).
+The learning rate is set to 0.1, which determines the size of weight updates during training (arbitrary choice for this problem).<br/>
+Finally, we create a new, unseen input [1, 1, 0] to test the network and we use the trained network to make a prediction on this new input.
+We print the prediction and the output should be close to 0 for correct XOR behavior. The actual output is 0.0015886416361329066, which is pretty consistent to what we expected.</p>
+<p>Here's the complete final code:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sigmoid</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">x</span><span class="p">))</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">sigmoid_derivative</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">x</span><span class="p">)</span>
+
+<span class="k">class</span><span class="w"> </span><span class="nc">SimpleNeuralNetwork</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">):</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">input_size</span><span class="p">,</span> <span class="n">hidden_size</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">randn</span><span class="p">(</span><span class="n">hidden_size</span><span class="p">,</span> <span class="n">output_size</span><span class="p">)</span>
+        
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a1</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z1</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w2</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">a2</span> <span class="o">=</span> <span class="n">sigmoid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">z2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">a2</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">output</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_error</span> <span class="o">=</span> <span class="n">y</span> <span class="o">-</span> <span class="n">output</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_error</span> <span class="o">*</span> <span class="n">sigmoid_derivative</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1_error</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">w2</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">z1_delta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1_error</span> <span class="o">*</span> <span class="n">sigmoid_derivative</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">w1</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">z1_delta</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w2</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">a1</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_delta</span><span class="p">)</span>
+    
+    <span class="k">def</span><span class="w"> </span><span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epochs</span><span class="p">,</span> <span class="n">learning_rate</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">epochs</span><span class="p">):</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">backward</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+            
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+
+<span class="c1"># Example usage</span>
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">"__main__"</span><span class="p">:</span>
+    <span class="c1"># Input data</span>
+    <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+    <span class="c1"># Create and train the network</span>
+    <span class="n">nn</span> <span class="o">=</span> <span class="n">SimpleNeuralNetwork</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">nn</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">epochs</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span> <span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+    <span class="c1"># Test the network</span>
+    <span class="n">test_data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
+    <span class="n">prediction</span> <span class="o">=</span> <span class="n">nn</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">test_data</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Prediction for [1, 1, 0]: </span><span class="si">{</span><span class="n">prediction</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+    <span class="c1"># Print final weights</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final weights:"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"Input to hidden layer (W1):"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">w1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Hidden to output layer (W2):"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">nn</span><span class="o">.</span><span class="n">w2</span><span class="p">)</span>
+</pre></div>
+<p><strong>Disclaimer</strong>: I’m sure I didn’t explain this perfectly. I’m going through a learning curve, and sharing this helps me stay accountable and motivated to improve. It’s a great way to learn because exposing your mistakes is a valuable part of the process.<br/>
+Thank you for reading this far, I really appreciate it. If you notice any inaccuracies or areas for improvement, please feel free to reach out, and I’ll make corrections as soon as possible.</p>
+<form action="/upvote/zudUHHIRCIjoeyjrxLJY/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="zudUHHIRCIjoeyjrxLJY"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="uZ9fF5GYZbhDMAQUsZ4Ah6AygY9MuyRtpfMcn9sxDHzj0ppOZ1B8SbGGIcfhLFqe"/>
+<button class="upvote-button" title="Toast this post">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">2</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

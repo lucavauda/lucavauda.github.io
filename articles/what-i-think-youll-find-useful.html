@@ -1,0 +1,85 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "12 Jul, 2024"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2024-07-12T16:11Z">
+                    12 Jul, 2024
+                </time>
+</i>
+</p>
+<p>I find myself wandering on the Internet and founding miracle content. There's so much stuff out here, this page could be a reasonable place to gather some interesting links (for me).
+I will be updating this list for as long as I can. Notice that probably some link will break sometimes in the future.</p>
+<ul>
+<li><a href="https://www.deep-ml.com/" target="_blank">Deep ML</a>: Leetcode stile ML and Deep Learning code challenge</li>
+<li><a href="https://distill.pub/" target="_blank">Distill</a>: Various super-interesting ML articles, incredible site design, unfortunately on pause.</li>
+<li><a href="https://eugeneyan.com/writing/how-to-interview/" target="_blank">How to Interview and Hire ML/AI Engineers</a>: Very intriguing blog post about ML/AI hiring process.</li>
+<li><a href="https://www.beren.io/2024-05-11-Integer-tokenization-is-now-much-less-insane/" target="_blank">Integer tokenization is now much less insane</a>: Tokenization is a really tricky problem, integer tokenization is even worse.</li>
+<li><a href="https://cs229.stanford.edu/main_notes.pdf" target="_blank">CS229 Lecture Notes</a>: ML notes by Andrew NG, still have to study them though.</li>
+<li>Karpathy's Neural Networks Zero to Hero: the legend himself teaching the coolest thing ever on Youtube.</li>
+<li><a href="https://theaisummer.com/" target="_blank">The AI Summer</a>: Great platform to learn basics and some advanced concepts of DL.</li>
+</ul>
+<h2 id="march-25-update">March 25 Update</h2><ul>
+<li><a href="https://huggingface.co/spaces/nanotron/ultrascale-playbook" target="_blank">The Ultra-Scale Playbook: Training LLMs on GPU Clusters</a>: Training LLMs and making lots of GPUs go brrr.</li>
+<li><a href="https://nlp.seas.harvard.edu/annotated-transformer/" target="_blank">The Annotated Transformer</a>: Nice blog about the infamous Attention is All You Need paper with code.</li>
+<li><a href="https://imbue.com/research/70b-intro/" target="_blank">How to build a 70B LLM model</a>: Three-part series on how they trained a 70B model</li>
+<li><a href="https://www.construction-physics.com/p/how-to-build-an-ai-data-center" target="_blank">How to Build an AI Data Center</a>: Interesting article on what challenges data centers confronts.</li>
+<li><a href="https://www.antisyphontraining.com/course/getting-started-in-security-with-bhis-and-mitre-attck-with-john-strand/" target="_blank">Getting Started in Security</a>: Course by Antisyphon Training and John Strand, it provided me an incredible fundamental refresher of security concepts (If useful, I've written my notes <a href="https://drive.google.com/file/d/1ZCYvdAdDowCm8u5UusYRpXTs8DvUaZH1/view?usp=drive_link" target="_blank">here</a>).</li>
+<li><a href="https://www.youtube.com/watch?v=zy8ChVd_oTM" target="_blank">Flash Attention from scratch</a>: 7.5 hours project about Flash Attention by Umar Jamil (TO-DO).</li>
+<li><a href="https://www.youtube.com/watch?v=Y-deZnSwD1M" target="_blank">Coding an Antivirus in C</a>: Dr Jonas Birch YouTube channel is great for C resources (TO-DO).</li>
+<li><a href="https://academy.tcm-sec.com/p/detection-engineering-for-beginners" target="_blank">Detection Engineering for Beginners</a>: Course I want to follow in the following months about Detection Engineering (TO-DO).</li>
+<li><a href="https://planetscale.com/blog/io-devices-and-latency" target="_blank">IO devices and latency</a>: Blog with beautiful visualization of IO devices (HD, SSD, tapes).</li>
+</ul>
+<form action="/upvote/GDXXjBPNwTIpsyQXuFnp/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="GDXXjBPNwTIpsyQXuFnp"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="bwYezs2SpkCGBZM1toigrq5lh7m9KnJkoM5pZzOLxs8oDkYRpUfi8O3Sx0JjLyrc"/>
+<button class="upvote-button" title="Toast this post">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">1</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

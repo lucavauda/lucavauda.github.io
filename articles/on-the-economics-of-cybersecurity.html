@@ -1,0 +1,141 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "05 Oct, 2024"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2024-10-05T08:59Z">
+                    05 Oct, 2024
+                </time>
+</i>
+</p>
+<p>I believe that having a broader perspective can influence how we approach the world. I'm an actually not educated on economics. I have very little knowledge about it. But it seems that money is pretty important in this world eg. I should learn some basics econ concepts to get through it better. <br/></p>
+<p>I have limited experience but, as I frequently do, when I want to explore some topic, I refer to Youtube.
+My interest is how can <em>economics</em> can shape the <em>cybersecurity</em> realm and how much they intertwined. And it looks like they are, as most things.
+In particular, "<a href="https://www.youtube.com/watch?v=9_8G8HmKH6Q&amp;list=PL88-McA5nKJN4mjTPAH6nR21K555WDdUF&amp;index=8" target="_blank">Security Engineering Lecture 5: The Economics of Security</a>" lecture by Ross Anderson seems to be incredibly useful answering this question.
+Ross Anderson was a really important figure, he was Professor of Security Engineering at Cambridge University and Edinburgh University. He wrote an incredible book called "Security Engineering" and this blog post will include the highlights of that lecture. This lecture is packed with information, hidden gems that need to be listened at least twice to discover how things actually work.</p>
+<h1 id="the-intersection-of-economics-and-cybersecurity">The Intersection of Economics and Cybersecurity</h1><p>Anderson's lecture reveals that cybersecurity isn't just about technology—it's deeply intertwined with economics. It is deeply relevant how <em>incentives</em> shape the economic analysis. The first topic of analysis is <strong>cooperation or conflict</strong>, and in its basic form we want to understand whether or not two or more will cooperate. To represent this, we have an tool called "Game Theory" that let's us represent the world via mathematical models, there could be for example perfect information games such as chess or go, or more interestingly imperfect information such as poker where you don't know the entire game state and the intentions of the other players.</p>
+<h1 id="1-game-theory-in-cybersecurity">1. Game Theory in Cybersecurity</h1><p>During the 20th century, Game Theory was applied to nuclear deterrence.  The question was:</p>
+<blockquote>
+<p>How could you persuade the Americans to cut the tens of thousands of nuclear warheads they had if there was a risk that the Russians wouldn't do the same? And how could you persuade the Russians to cut their armaments if the Americans might not do the same?</p>
+</blockquote>
+<p>Game theory could also play a role in understanding cybersecurity dynamics. The example given represent a subset of what the lecture talks about, for the purpose of this article I'll write about the two most important thought experiments.</p>
+<h2 id="strongprisoners-dilemmastrong"><strong>Prisoner's Dilemma</strong></h2><p>This classic game theory scenario applies to many cybersecurity situations. For example, two companies might both benefit from sharing threat intelligence, but fear giving competitors an advantage.
+An example of interest to us as we study cybercrime could be do you persuade the police in a given country to extradite a cyber criminal in another who's doing fraud against people in the capital, for example, when the police don't extradite people or don't even investigate people who are doing cybercrime in the first country, let alone against residents of foreign countries?</p>
+<p>Police priorities just don't place the welfare of foreign citizens that high on the agenda. And so if you're a police force, how do you get collaboration from foreign police forces against criminals?
+And of course, there's some countries like Russia and Israel, for example, that won't extradite their nationals at all.</p>
+<p>So prisoners' dilemma is a real problem when we're dealing with cybercrime.
+And going back to the normal form of the game, we come to this tough but inescapable conclusion. If the game is truly as described, then there isn't any escape.</p>
+<p>To fix this one of the ways that you can do it is by changing the game (for example by being merciful, see <a href="https://it.wikipedia.org/wiki/Tit_for_tat" target="_blank">Tit-for-tat</a>). Over the past 30 years or so, people have realized that the evolution of strategy explains an awful lot of behavior among people, among corporations, among states, and even among animals.</p>
+<h2 id="stronghawk-dove-gamestrong"><strong>Hawk-Dove Game</strong></h2><p>This model helps explain why some individual animal of a given populations are more aggressive than others. In cybersecurity, you can model it asn why some actors are more aggressive than others, balancing the potential gains against the risks of conflict.</p>
+<p>This turns out to be a reasonably good model of how aggression comes about, and how it settles at a particular level among people, among firms, among states, and of course in the animal kingdom, which is what Maynard Smith, the evolutionary biologist who developed this model, was setting out to try and model.</p>
+<p>The algebraic results are really interesting and not the scope of this blog post, but the Hawk-Dove model suggest that constantly playing Hawk (being aggressive) is not optimal. Sometimes, the equilibrium involves a mixed strategy (sometimes being aggressive, sometimes not). This indicate that unpredictability can be advantageous in competitive situations. For a better deep dive, I suggest visiting this <a href="https://college.holycross.edu/faculty/kprestwi/behavior/ESS/HvD_intro.html" target="_blank">webpage</a>.</p>
+<h1 id="2-market-forces-and-security-failures">2. Market Forces and Security Failures</h1><p>In second part of the lecture, Anderson explains how market dynamics can lead to suboptimal security outcomes, for example when markets fail, how they fail, and how this affects security.</p>
+<p>Classical economic theory, originating with Adam Smith's "<em>invisible hand</em>", suggests that markets function efficiently when numerous buyers and sellers interact, and no single player holds market power. This leads to an equilibrium where supply meets demand, and resources are allocated efficiently.</p>
+<p>Economists use Pareto efficiency as a standard for market efficiency. A market is Pareto efficient if no one can be made better off without making someone else worse off. However, this definition doesn't account for fairness, meaning a highly unequal distribution of resources can still be "efficient" by this definition.</p>
+<p>For a market to remain efficient, several conditions must be met:</p>
+<ul>
+<li>Rational Actors: All participants must act rationally.</li>
+<li>Property Rights: All goods and services must have clear ownership and be tradable.</li>
+<li>Complete Information: All market participants need access to the same information.</li>
+<li>No Transaction Costs: Buying and selling should occur without friction.</li>
+</ul>
+<p>Infomation is crucial, so a really importatnt factor for the economics of the information goods and service markets is this: the marginal cost of information is basically <strong>zero</strong>. As an example, encyclopedia back in the days were so expensive, nowadays Wikipedia has fundamentally all the information for free. The question then translate to:</p>
+<blockquote>
+<p>How can someone make money out of selling information?</p>
+</blockquote>
+<p>First let's define a few concepts.</p>
+<ul>
+<li><p><strong>Externalities</strong>: Externalities are goods or bads that people care about, but aren't traded because they're typically side effects.
+An example of a negative externality would be a steelworks, which was polluting a fishery downstream.
+Another example is firms and households emitting oil. And this is basically heating up the planet.
+And a third would be insecure IoT devices, which end up being hacked and ending up in botnets. <br/>
+There are also positive externalities, such as education, where we find that if people have one more year of education, then that cuts crime by about 2%.
+Other positive externalities include technical standards, which enable firms to make their products interoperate</p>
+</li>
+<li><p><strong>Public Goods</strong>: A public good is non-rivalrous and non-excludable, which means that my consumption of the public good doesn't affect your consumption, I've got no means of stop
+ping you consuming a public good if I produce it. An example of public good is <em>scientific knowledge</em>.</p>
+</li>
+<li><p><strong>Network Externalities</strong>: This is where the connection to information industries becomes clearer. In fact, the inventor of Ethernet, Bob Metcalf, came up with Metcalf's Law, as he called it, that the value of a network is proportional to the square of the number of users. Two example of network externalities are telephones, email ans social networks. The problem with that is the creation of monopoly.</p>
+</li>
+<li><p><strong>Technical Lock-in</strong>: Often in the information goods and services world, if you buy a product, you end up being committed to buying more of it or to spending money on things like durable complementary assets such as apps. A few examples could be Iphone/Android, Office/Google Docs. This makes it more difficult for you to switch from one vendor to another.</p>
+</li>
+</ul>
+<h1 id="3-the-economics-of-information-goods">3. The Economics of Information Goods</h1><p>Cybersecurity products and services have unique economic properties. Low marginal costs, technical lock-in, and network externalities tend to lead to a dominant firm market model, where one firm or a small number of firms can set prices and extract significant money from the market. Given all three factors, monopoly becomes even more likely.
+Anderson emphasizes how misaligned incentives often lead to security failures:</p>
+<ul>
+<li><p><strong>Vendor vs. User Security</strong>: Companies may prioritize rapid market entry over security, leaving users to bear the risk. This is exemplified by Microsoft's "ship it Tuesday and get it right by version three" philosophy in the 1990s. Similarly, many Android phones today are not patched up to date, and Facebook provides users with an illusion of privacy while making most information available to advertisers.</p>
+</li>
+<li><p><strong>Asymmetric Information</strong>: In cybersecurity markets, buyers often can't distinguish between good and bad products, leading to potential "lemons markets." Anderson uses the example of used cars to illustrate this concept: when buyers can't tell the difference between good and bad cars, only the "lemons" (bad cars) end up on the market. In cybersecurity, this can mean companies invest more in marketing than in actual security engineering.</p>
+</li>
+<li><p><strong>Moral Hazard</strong>: The existence of cybersecurity insurance might lead some companies to underinvest in security measures. Anderson gives the example of Volvo drivers having more accidents, possibly because they feel safer and drive more recklessly. In cybersecurity, companies with insurance might take more risks, knowing they're covered.</p>
+</li>
+</ul>
+<p>These economic factors shape how information industries, including cybersecurity firms, develop their business models and generate revenue, often at the expense of optimal security outcomes for users</p>
+<h1 id="4-measuring-cybercrime">4. Measuring Cybercrime</h1><p>Accurately measuring cybercrime presents significant challenges due to various factors that can skew data. Anderson highlights how different stakeholders may manipulate or misreport cybercrime statistics to serve their interests. For instance, banks might blame customers for fraud to avoid liability, while law enforcement and politicians may underreport to appear more effective. A stark example of this comes from the UK, where from 2005 to 2015, a policy change requiring fraud victims to report to banks first led to a misleading decrease in reported crime rates. This had far-reaching political consequences, allowing politicians to claim success in crime reduction while actually masking the growing issue of cybercrime.</p>
+<p>To get a better grasp of the cybercrime landscape, Anderson and his team did some big surveys in 2012 and 2019. Surprisingly, even though technology had changed a lot, the main trends in cybercrime stayed pretty much the same Surprisingly, despite significant technological shifts (from laptops to smartphones, on-premises servers to cloud computing), the underlying economic patterns of cybercrime remained relatively stable. Their findings categorized cybercrime costs into three main areas:</p>
+<ul>
+<li>Traditional fraud now conducted via computers (e.g., tax and welfare fraud), costing hundreds of dollars per citizen annually.</li>
+<li>Evolved fraud leveraging new technologies (e.g., payment fraud), costing tens of dollars per person yearly.</li>
+<li>Pure cybercrime and related infrastructure (e.g., botnets, antivirus software), costing several dollars per person annually.</li>
+</ul>
+<p>The research also revealed a notable exception: ransomware and cryptocurrency-related crime, which have been doubling yearly, reaching $2 billion globally by 2018. This rapid growth is attributed to easily exploitable systems, cryptocurrency-enabled money laundering, and scalable criminal business models like "ransomware as a service."
+Anderson emphasizes that understanding and measuring cybercrime requires a multidisciplinary approach, combining economics, engineering, and psychology. He also notes the importance of victimization surveys, such as those conducted by the UK's Office of National Statistics, which provide a more accurate picture of cybercrime prevalence than official reports alone.</p>
+<h1 id="conclusion">Conclusion</h1><p>And that wraps up my takeaways from Prof. Anderson’s incredible lecture. One of my favorite lines from him was this:</p>
+<blockquote>
+<p>Understanding that means understanding the economics and its business model, it means understanding the engineering, and in many cases, it also means understanding the psychology.</p>
+</blockquote>
+<p>In conclusion, what I hope to convey is how much cybersecurity isn't just about tech—it’s this complex mix of economics, engineering, and even human behavior. We’ve touched on how markets shape security, the role of game theory in cyber dynamics, and how to measure cybercrime effectively.</p>
+<p>I hope you found this as eye-opening as I did. Thanks for your time!</p>
+<form action="/upvote/mXogCeuLzILBzbrLBUxg/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="mXogCeuLzILBzbrLBUxg"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="9oQsnR5po7meRYk2moz2mbrKyJMyHl6mBNLe7rYksozO2YgUBIxQxrlsZ2KNxyLU"/>
+<button class="upvote-button" title="Toast this post">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">1</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>

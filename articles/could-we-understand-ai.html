@@ -1,0 +1,101 @@
+<!doctype html>
+<meta charset="utf-8">
+<script src="https://distill.pub/template.v1.js"></script>
+
+<script type="text/front-matter">
+  title: "Luca Vaudano&#x27;s Blog"
+  description: "24 Oct, 2024"
+  authors:
+  - Luca Vauda: https://lucavauda.github.io/
+  affiliations:
+  # - Your Affiliation: http://example.com
+</script>
+
+<dt-article>
+  <h1>Luca Vaudano&#x27;s Blog</h1>
+  <dt-byline></dt-byline>
+  
+  <main>
+
+<p>
+<i>
+<time datetime="2024-10-24T17:19Z">
+                    24 Oct, 2024
+                </time>
+</i>
+</p>
+<p>Here's a weird thought experiment: imagine you're watching a chef prepare a complex dish. You can see every ingredient they use, every technique they employ, and even measure the exact temperature of their pan. Now imagine the same chef, but this time they're cooking inside a black box. You can only see what goes in (raw ingredients) and what comes out (the finished dish). Which scenario gives you a better understanding of how to cook?</p>
+<p>This is essentially the story of modern AI. We've created systems of staggering capability, but in doing so, we've increasingly moved from the first scenario to the second. And surprisingly, this transition has a clear inflection point: a 2012 paper about classifying images of cats.</p>
+<h1 id="the-revolution-nobody-expected">The revolution nobody expected</h1><p>The paper in question came out in 2012. It is called “ImageNet Classification with Deep Convolutional Neural Networks” or more famously, “AlexNet”. The name comes from the first contributor of the paper, the researcher Alex Krizhevsky, the second author Ilya Sustkever, who would co-found OpenAI, and finally their advisor, Geoffrey Hinton, who recently won the Nobel Prize. A stellar team I may say.<br/>
+<a href="https://proceedings.neurips.cc/paper_files/paper/2012/file/c399862d3b9d6b76c8436e924a68c45b-Paper.pdf">AlexNet</a> wasn't supposed to be revolutionary. It was built on artificial neural network principles from the 1940s, using an architecture that wasn't radically different from what researchers had tried before. Yet this relatively simple system - a stack of computational layers that repeatedly transform input data - absolutely demolished the competition at the 2012 ImageNet Challenge.</p>
+<p>To appreciate why this was so shocking, consider what came before. The previous year's winner used a carefully crafted pipeline of specialized algorithms, each designed by experts to handle specific aspects of image recognition. It was like a well-orchestrated assembly line, where you could point to each component and say, "This part finds edges, this part identifies textures, this part groups similar features." It was complex, but comprehensible.</p>
+<p>What made AlexNet different wasn't its architecture but its <strong>scale</strong>: 60 million parameters trained on 1.3 million images using two GPUs thousands of times more powerful than what was available a decade earlier. As Ian Goodfellow later noted in his <a href="https://www.deeplearningbook.org/">deep learning book</a>, the algorithms that made AlexNet work had existed since the 1980s. We just didn't have the computational resources to make them sing.</p>
+<h1 id="scale-changes-everything">Scale changes everything</h1><p>The success of AlexNet marked a fundamental shift in AI: from carefully engineered features to learned representations, from human-designed algorithms to data-driven learning. Each layer in AlexNet performed relatively simple matrix operations, but when stacked together and trained on massive amounts of data, they somehow learned to recognize complex visual patterns.</p>
+<p>This shift had profound implications. While previous systems were built on explicit human knowledge and could be analyzed piece by piece, AlexNet's behavior emerged from millions of parameters interacting in ways that weren't immediately obvious to human observers. The irony was stark: we had created a more capable system by giving up some of our ability to understand exactly how it worked.</p>
+<h1 id="inside-the-black-box">Inside the Black Box</h1><p>Yet AlexNet wasn't completely opaque. Researchers could still visualize what different parts of the network had learned, and what they found was fascinating. The first layer learned to detect edges and color blobs - reasonable building blocks for image recognition. The second layer combined these primitives into slightly more complex patterns: corners, textures, simple shapes.</p>
+<p>But then something remarkable happened. As they looked deeper into the network, researchers noted that in the last layers were capable of recognizing abstract concepts. They found explicit “neurons” that responded strongly to faces, despite the network never being explicitly told what a face was. It had somehow learned, entirely on its own, that faces were important patterns worth detecting.</p>
+<p>This ability to peek inside AlexNet gave birth to a whole field of neural network visualization and interpretability. Researchers developed techniques like activation maximization, which could generate synthetic images that maximally activated specific neurons, and feature visualization, which helped reveal what different parts of the network had learned to detect.</p>
+<p>Yet, as neural networks evolved and expanded beyond vision into natural language processing (NLP), the challenge of understanding these models grew even more complex.<br/>
+In language models like GPT, the abstract representations became more elusive—dealing not with visual patterns, but with ideas, meanings, and relationships between words. These models processed text through layer upon layer of computations, much like AlexNet processed images, but the internal logic wasn’t as easily visualized. This shift marked the beginning of a new challenge in AI research: how could we apply the tools we used in vision to make sense of models that deal with language? This is where the story of mechanistic interpretability begins.</p>
+<h1 id="from-vision-to-language">From vision to language</h1><p>As excitement grew around groundbreaking advancements in NLP and dialogue systems, particularly following the introduction of powerful Transformer-based models like GPT-3, many researchers began shifting their focus toward these technologies. This transformation in the field began with the pivotal 2017 paper “<a href="https://arxiv.org/abs/1706.03762v7">Attention is All You Need</a>“ by Vaswani et al., which introduced the Transformer architecture. Unlike previous models reliant on recurrent neural networks, Transformers leveraged a novel self-attention mechanism, enabling unprecedented parallelization and scaling. This innovation set the stage for the development of increasingly sophisticated language models, ultimately reshaping the landscape of NLP and attracting researchers from diverse fields. If you weren’t aware, the T in GPT stands for “Transformer”.</p>
+<p>As neural networks spread from computer vision to natural language processing, the challenge of understanding them grew more complex. GPT takes in words, turns them into vectors, and passes them through transformers again and again, until it spits out the next word in a sentence. Yet, somewhere in this process, the model learns to summarize books, solve math problems, and even write coherent essays.</p>
+<p>Language models (which existed also before GPT if you didn’t know that) didn't produce convenient visualizations like AlexNet's feature maps. Their internal representations were more abstract, dealing with concepts rather than visual patterns.</p>
+<p>This is where the story of mechanistic interpretability begins in earnest. Researchers, many coming from computer vision backgrounds, began asking: Could we understand these language models the same way we tried to understand AlexNet? Could we identify specific components responsible for specific behaviors?</p>
+<h1 id="the-many-faces-of-mechanistic-interpretability">The many faces of Mechanistic Interpretability</h1><p>The term mechanistic interpretability (MI) was coined by Chris Olah and first publicly used in the Distill.pub Circuits thread, a series of blog posts by OpenAI researchers between March 2020–April 2021. It emerged as researchers grappled with these questions, but it quickly became apparent that people meant different things when they used it. Like the proverbial blind men describing an elephant, different researchers approached the problem from different angles.</p>
+<p>I recently read a super-interesting <a href="https://arxiv.org/pdf/2410.09087">paper</a> from which I will try to take the key points. It divides the definitions into the <strong>narrow technical definition</strong> - the purist's view - focuses on identifying specific causal pathways within neural networks. It's like finding <a href="https://transformer-circuits.pub/2022/in-context-learning-and-induction-heads/index.html"><em>induction heads</em></a> in language models: components specifically responsible for recognizing and completing patterns.<br/>
+One of the first approaches was finding a circuit, which is groups of components forming a sub-network that closely (or faithfully) replicate the full model’s performance on a fine-grained task. Here's an excerpt from Anthropic's blog:</p>
+<blockquote>
+<p>Those circuits function is to look back over the sequence for previous instances of the current token (call it <dt-code>A</dt-code>), find the token that came after it last time (call it <dt-code>B</dt-code>), and then predict that the same completion will occur again (e.g. forming the sequence <dt-code>[A][B] … [A] → [B]</dt-code>).</p>
+</blockquote>
+<p>This approach aims for the kind of mechanical understanding we have of a clock, where we can trace exactly how each component contributes to the final output.</p>
+<p>The <strong>broader technical definition</strong> encompasses any serious attempt to understand AI's internal workings, even if we can't map out every causal relationship perfectly.<br/>
+It's more like taking apart a car engine - you might not understand every interaction, but you're learning valuable information about how the machine works.<br/>
+An example could be the <a href="https://rome.baulab.info/">ROME</a> paper, in which is studied the factual associations in a GPT-like model, which its main contribution is that you can actually localize <em>where</em> the fact is in the MLP module and <em>individual factual associations can be changed</em> by making small rank-one changes in a single MLP module. In simpler words, you can steer the behavior of the model by changing some internal parameters.</p>
+<p>These technical definitions were soon joined by cultural ones. The <strong>narrow cultural definition</strong> emerged from the AI safety community, focused on understanding these systems well enough to ensure they remain aligned with human values. The <strong>broad cultural definition</strong> has become an umbrella term for almost any research aimed at understanding how these models work.</p>
+<p>The paper I mentioned before argues that this shift and terminology has had real consequences. When researchers started using the word mechanistic, it attracted more funding, more attention, which makes sense in a way.<br/>
+This proliferation of definitions isn't just academic hair-splitting. The term "mechanistic interpretability" has become a powerful brand in AI research, attracting funding and attention in ways that similar work under different labels often doesn't. This has real consequences for how we approach AI development and safety.</p>
+<h1 id="what-about-the-future">What about the future?</h1><p>As we stand here in 2024, with language models thousands of times larger than AlexNet, the challenge of understanding AI systems has only grown more urgent. Recent papers suggest me that MI has the potential to actually be useful to “reverse-engineer” the algorithms implemented by neural networks into human-understandable mechanisms and consequently understand to a certain degree how and why it works.<br/>
+One significant challenge is <strong>polysemanticity</strong>, where individual neurons activate in response to multiple unrelated classes or concepts. To address this, recent advancements from Anthropic demonstrate how set activations can be mapped to specific concepts or language, offering insights into LLM functioning and the potential for model behavior modification. For instance, by clamping activations corresponding to the concept of the Golden Gate Bridge to a high value, the experimental LLM began to identify itself as the Golden Gate Bridge. It feels right to emphasize that this work remains preliminary, requiring further research to explore the implications of these potentially safety-relevant features.</p>
+<p>What's clear is that the journey that began with peering inside AlexNet has led us to fundamental questions about what it means to understand an AI system. As these systems become more powerful and more integrated into our world, finding answers to these questions becomes increasingly crucial.</p>
+<p><strong>We stopped fully understanding our AI systems precisely when they started working better than ever</strong>. But maybe that's the point - maybe understanding artificial intelligence requires different kinds of understanding than we've needed before. And figuring that out might be one of the most important challenges we face as we continue to push the boundaries of what AI can do.</p>
+<h1 id="conclusion">Conclusion</h1><p>I really believe that this topic is incredibly “visual-oriented”. It is really useful to get a grip on these concepts by reading the post on Distil.pub. Then if you want a really intuitive way to visualize this, <a href="https://www.youtube.com/watch?v=jGCvY4gNnA8">Rational Animations made an incredible video about it</a>.<br/>
+Of course, you shouldn’t write an article mentioning MI without mentioning Neel Nanda, who is a really important figure in the field. His work is incredibly valuable, I think you should check out his <a href="https://www.neelnanda.io/">website</a>, his <a href="https://scholar.google.com/citations?user=GLnX3MkAAAAJ&amp;hl=en">publications</a> and his <a href="https://www.youtube.com/channel/UCBMJ0D-omcRay8dh4QT0doQ">Youtube channel</a>. Indeed, he provides a really good intro to what this world of research actually looks like, like for example coding GPT-2 from scratch or his work on <a href="https://arxiv.org/abs/2301.05217">grokking modular addition</a>.</p>
+<p>Then I should point you to some really interesting papers from a various sources such as: <a href="https://arxiv.org/abs/2211.00593">a Circuit for Indirect Object Identification in GPT-2 Small</a>, also known as Interpretability in the Wild (IOI paper), <a href="https://arxiv.org/abs/2304.14997">Towards Automated Circuit Discovery for Mechanistic Interpretability</a>, <a href="https://transformer-circuits.pub/2023/monosemantic-features/index.html">Towards Monosemanticity: Decomposing Language Models With Dictionary Learning</a>, <a href="https://transformer-circuits.pub/2024/scaling-monosemanticity/index.html">Scaling Monosemanticity: Extracting Interpretable Features from Claude 3 Sonnet</a>. Finally, if you want to get a sense of what the research looks like, a nice youtube video by Neel, called “<a href="https://www.youtube.com/watch?v=veT2VI4vHyU">Mechanistic Interpretability: A Whirlwind Tour</a>”.</p>
+<p>I strongly believe that this isn't just an academic esoteric topic. As AI systems become more powerful and more integrated into our society, our ability to understand and guide their development becomes increasingly important. The future of AI security/safety, reliability, and alignment may well depend on our success in this field.</p>
+<form action="/upvote/aRqiHuMRqvSNBzuYPqVv/" id="upvote-form" method="post" style="display: inline">
+<small>
+<input hidden="" name="uid" style="display:none" value="aRqiHuMRqvSNBzuYPqVv"/>
+<input hidden="" name="title" style="display:none"/>
+<input name="csrfmiddlewaretoken" type="hidden" value="oL6Mi0dWqdKPRL7IA1OBYxH4xZmqylVhtagAksKJguBDEuQAkPFy9OetkbL51WqE"/>
+<button class="upvote-button" title="Toast this post">
+<svg class="css-i6dzq1" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<polyline points="17 11 12 6 7 11"></polyline>
+<polyline points="17 18 12 13 7 18"></polyline>
+</svg>
+<small class="upvote-count">1</small>
+</button>
+</small>
+</form>
+<script>
+    document.querySelector('#upvote-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const form = e.target;
+        fetch(form.action, {
+            method: form.method,
+            body: new FormData(form),
+        });
+        const button = form.querySelector('button')
+        button.disabled = true
+        button.style.color = "salmon"
+        const upvoteCount = document.querySelector('.upvote-count')
+        upvoteCount.innerHTML = `${(parseInt(upvoteCount.innerHTML.split(" ")[0]) + 1)}`
+    });
+</script>
+</main>
+</dt-article>
+
+<dt-appendix>
+</dt-appendix>
+
+<script type="text/bibliography">
+</script>
